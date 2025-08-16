@@ -1,4 +1,4 @@
-package com.example;
+package dev.coolname;
 
 public class Main {
     public static void main(String[] args) {
