@@ -48,7 +48,7 @@ public class TetrisLayoutButton extends JButton{
         @Override
         //TODO: manually clicking on a button will cause disjoint between what will display and board[i][j]. fix this somehow idk man not myh probelm good luck have fun
         public void actionPerformed(ActionEvent e) {
-            mino++;
+            setMino(mino+ 1);
             TetrisLayoutButton.this.setText(Integer.toString(mino));
         }
     });

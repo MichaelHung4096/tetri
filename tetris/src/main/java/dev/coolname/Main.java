@@ -32,6 +32,9 @@ public class Main {
 
         frame.add(board);
 
+
+
+        int[] queue = new int[7];
         init();
     }
 }
