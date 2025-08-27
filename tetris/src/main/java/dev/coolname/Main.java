@@ -5,6 +5,10 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -32,22 +36,23 @@ public class Main {
 
 
 
+
         int[][] board = new int[20][10];
         for(int i = 0; i < 20; i++) {
             for(int j = 0; j < 10; j++) {
-                board[i][j] = i*100 + j;
+                board[i][j] = 0;
             }
         }
 
         GridLayout layout = new GridLayout(20,10);
         JPanel panel = new JPanel(layout);
-        Border border = BorderFactory.createEmptyBorder(0, 0, 0, 0);
-        for(int i = 0; i < 200; i++) {
-            JButton button = new JButton(Integer.toString(i));
-            button.setBackground(Color.red);
-            button.setPreferredSize(new Dimension(30, 30));
-            button.setBorder(border);
+        for(int i = 0; i < 20; i++) {
+            for(int j = 0;j < 10; j++){
+            TetrisLayoutButton button = new TetrisLayoutButton(30, 30, i, j);
+            button.setText(Integer.toString(board[i][j]));
+            button.setMino(board[i][j]);
             panel.add(button);
+            }
         }
 
         frame.add(panel);
