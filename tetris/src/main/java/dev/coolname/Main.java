@@ -20,42 +20,17 @@ public class Main {
     private static JFrame frame;
 
     private static void init() {
-                // Close operation
         frame.setDefaultCloseOperation(
             JFrame.EXIT_ON_CLOSE);
-
-        // Make the frame visible
         frame.setVisible(true);
-
         frame.pack();
     }
     public static void main(String[] args) {
         frame = new JFrame("My First JFrame");
 
+        TetrisBoard board = new TetrisBoard(30, 39);
 
-
-
-
-
-        int[][] board = new int[20][10];
-        for(int i = 0; i < 20; i++) {
-            for(int j = 0; j < 10; j++) {
-                board[i][j] = 0;
-            }
-        }
-
-        GridLayout layout = new GridLayout(20,10);
-        JPanel panel = new JPanel(layout);
-        for(int i = 0; i < 20; i++) {
-            for(int j = 0;j < 10; j++){
-            TetrisLayoutButton button = new TetrisLayoutButton(30, 30, i, j);
-            button.setText(Integer.toString(board[i][j]));
-            button.setMino(board[i][j]);
-            panel.add(button);
-            }
-        }
-
-        frame.add(panel);
+        frame.add(board);
 
         init();
     }
