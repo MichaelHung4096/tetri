@@ -1,21 +1,7 @@
 package dev.coolname;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.LayoutManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.Border;
 public class Main {
     private static JFrame frame;
 
@@ -36,5 +22,7 @@ public class Main {
 
         int[] queue = new int[7];
         init();
+
+        TetrisPiece[] bag = TetrisPiece.values();
     }
 }

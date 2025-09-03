@@ -22,7 +22,7 @@ public class TetrisLayoutButton extends JButton{
         this.setPreferredSize(new Dimension(width, height));
         this.row = row;
         this.column = column;
-        this.setBackground(Color.red);
+        this.setBackground(Color.white);
         this.setText(Integer.toString(row * 100 + column));
         this.setBorder(border);
 
@@ -43,13 +43,47 @@ public class TetrisLayoutButton extends JButton{
         this.mino = mino;
     }
 
+    public void updateMino() {
+        int mino = getMino();
+        switch (mino) {
+            case 1:
+                this.setBackground(Color.CYAN);
+                break;
+
+            case 2:
+                this.setBackground(Color.ORANGE);
+                break;
+            case 3:
+                this.setBackground(Color.BLUE);
+                break;
+            case 4:
+                this.setBackground(Color.GREEN);
+                break;
+            case 5:
+                this.setBackground(Color.YELLOW);
+                break;
+            case 6:
+                this.setBackground(Color.PINK);
+                break;
+            case 7:
+                this.setBackground(Color.RED);
+                break;
+        
+            default:
+                break;
+        }
+
+        
+        TetrisLayoutButton.this.setText(Integer.toString(mino));
+    }
+
     private void addActionListener() {
         this.addActionListener(new ActionListener() {
         @Override
         //TODO: manually clicking on a button will cause disjoint between what will display and board[i][j]. fix this somehow idk man not myh probelm good luck have fun
         public void actionPerformed(ActionEvent e) {
-            setMino(mino+ 1);
-            TetrisLayoutButton.this.setText(Integer.toString(mino));
+            setMino(TetrisLayoutButton.this.getMino()+ 1);
+            updateMino();
         }
     });
     }
