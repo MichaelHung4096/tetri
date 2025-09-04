@@ -1,7 +1,11 @@
 package dev.coolname;
 
 
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 public class Main {
     private static JFrame frame;
 
@@ -13,16 +17,24 @@ public class Main {
     }
     public static void main(String[] args) {
         frame = new JFrame("My First JFrame");
+        frame.setLayout(new FlowLayout());
 
-        TetrisBoard board = new TetrisBoard(30, 39);
+        TetrisHold hold = new TetrisHold();
 
+
+        TetrisBoard board = new TetrisBoard(30, 30);
+
+        TetrisQueue queue = new TetrisQueue(30, 30);
+;
+        frame.add(hold);
         frame.add(board);
+        frame.add(queue);
+
+
+        System.out.println(queue.getReadableQueue());
 
 
 
-        int[] queue = new int[7];
         init();
-
-        TetrisPiece[] bag = TetrisPiece.values();
     }
 }

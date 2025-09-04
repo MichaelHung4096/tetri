@@ -30,7 +30,7 @@ public class TetrisBoard extends JPanel{
     private void initCells() {
         for(int i = 0; i < ROWS; i++) {
             for(int j = 0; j < COLS; j++) {
-                TetrisLayoutButton button = new TetrisLayoutButton(30, 30, i, j);
+                TetrisInteractiveButton button = new TetrisInteractiveButton(30, 30, i, j);
                 button.setText(Integer.toString(board[i][j]));
                 button.setMino(board[i][j]);
                 this.add(button);
