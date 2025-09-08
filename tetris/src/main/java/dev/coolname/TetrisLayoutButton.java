@@ -16,6 +16,7 @@ public class TetrisLayoutButton extends JButton{
     private int column;
     public static Border border = BorderFactory.createEmptyBorder(0, 0, 0, 0);
     public int mino = 0;
+    private boolean isInteractable = true;
 
 
     public TetrisLayoutButton(int width, int height, int row, int column) {
@@ -101,6 +102,14 @@ public class TetrisLayoutButton extends JButton{
                 System.out.println(e.getKeyChar());
             }
         });
+    }
+
+    public boolean getInteractivity() {
+        return isInteractable;
+    }
+
+    public void setInteractivity(boolean interactability) {
+        isInteractable = interactability;
     }
 
 

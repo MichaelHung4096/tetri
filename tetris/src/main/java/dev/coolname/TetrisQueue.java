@@ -2,6 +2,7 @@ package dev.coolname;
 
 import java.awt.GridLayout;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -15,11 +16,15 @@ public class TetrisQueue extends JPanel{
     private List<TetrisPiece> actually_all_pieces = Arrays.asList(all_pieces);
     private List<TetrisPiece> queue = List.copyOf(actually_all_pieces);
 
+    private List<TetrisPieceDisplayer> queue_displays = new ArrayList<>();
+
 
     public TetrisQueue(int width, int height) {
         super(layout);
 
         initQueueCells();
+
+        queue_displays.get(2).updatePiece(TetrisPiece.O_PIECE);
     }
 
     public List<TetrisPiece> getQueue() {
@@ -39,19 +44,11 @@ public class TetrisQueue extends JPanel{
     }
 
     public void initQueueCells() {
-        GridLayout layout = new GridLayout(4, 4);
         for(int i = 0; i < QUEUE_LENGTH; i++) {
-            JPanel tetrisPieceSlot = new JPanel();
-            tetrisPieceSlot.setLayout(layout);
-            
-            for(int j = 0; j < 4; j++) {
-                for(int k = 0; k < 4; k++) {
-                    TetrisNoninteractiveButton button = new TetrisNoninteractiveButton(30, 30, j, k);
-                    tetrisPieceSlot.add(button);
-                }
-            }
-
-            this.add(tetrisPieceSlot);
+            TetrisPieceDisplayer displayer = new TetrisPieceDisplayer(30, 30);
+            queue_displays.add(displayer);
+            this.add(displayer);
         }
+
     }
 }
