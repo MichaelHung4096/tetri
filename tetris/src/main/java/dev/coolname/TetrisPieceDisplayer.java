@@ -57,7 +57,7 @@ public class TetrisPieceDisplayer extends JPanel{
         for(int i = 0; i < displayData.length; i++) {
             if(i == board.length) {continue;}
             for(int j = 0; j < board[i].length; j++) {
-                board[i][j] = piece.rotations[0][i][j];
+                //board[i][j] = piece.rotations[0][i][j];
             }
         }
     }
