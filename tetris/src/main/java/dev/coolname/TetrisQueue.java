@@ -4,10 +4,10 @@ import java.awt.GridLayout;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 import javax.swing.JPanel;
 
+//TODO: 2x4 is probably the best dimensions
 public class TetrisQueue extends JPanel{
     public static final int QUEUE_LENGTH = 5;
     public static final GridLayout layout = new GridLayout(QUEUE_LENGTH, 1);

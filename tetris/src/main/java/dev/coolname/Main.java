@@ -1,11 +1,10 @@
 package dev.coolname;
 
 
+import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 public class Main {
     private static JFrame frame;
 
@@ -21,10 +20,11 @@ public class Main {
 
         TetrisHold hold = new TetrisHold();
 
-
         TetrisBoard board = new TetrisBoard(30, 30);
 
         TetrisQueue queue = new TetrisQueue(30, 30);
+
+        hold.setAlignmentY(Component.TOP_ALIGNMENT);
 ;
         frame.add(hold);
         frame.add(board);

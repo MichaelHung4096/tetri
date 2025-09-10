@@ -47,6 +47,9 @@ public class TetrisLayoutButton extends JButton{
     public void updateMino() {
         int mino = getMino();
         switch (mino) {
+            case 0:
+                this.setBackground(Color.WHITE);
+                break;
             case 1:
                 this.setBackground(Color.CYAN);
                 break;

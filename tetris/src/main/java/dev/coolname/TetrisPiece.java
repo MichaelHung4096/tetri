@@ -30,8 +30,10 @@ public enum TetrisPiece {
                                                      {0,5,5}}
                                                 }),
     O_PIECE(6, 'O', Color.YELLOW, new int[][][] {
-                                                    {{6,6},
-                                                     {6,6}}
+                                                    {{6,6,0,0},
+                                                     {6,6,0,0},
+                                                     {0,0,0,0},
+                                                     {0,0,0,0}}
                                                     }),
     T_PIECE(7, 'T', Color.PINK, new int[][][] {
                                                     {{0,0,0},

@@ -54,18 +54,19 @@ public class TetrisPieceDisplayer extends JPanel{
 
     private void updateBoardData() {
         int[][] displayData = piece.rotations[0];
-        for(int i = 0; i < displayData.length; i++) {
-            if(i == board.length) {continue;}
-            for(int j = 0; j < board[i].length; j++) {
-                //board[i][j] = piece.rotations[0][i][j];
+        for(int i = 0; i < ROWS; i++) {
+            if(i >= displayData.length) {continue;}
+            for(int j = 0; j < COLS; j++) {
+                if(j >= displayData[i].length) {continue;}
+                    board[i][j] = displayData[i][j];
             }
         }
     }
 
     private void displayPiece() {
 
-        for(int i = 0; i < board.length; i++) {
-            for(int j = 0; j < board[i].length; j++) {
+        for(int i = 0; i < ROWS; i++) {
+            for(int j = 0; j < COLS; j++) {
                 TetrisLayoutButton cell =  displayBoard.get(i).get(j);
                 cell.setMino(board[i][j]);
                 cell.updateMino();
