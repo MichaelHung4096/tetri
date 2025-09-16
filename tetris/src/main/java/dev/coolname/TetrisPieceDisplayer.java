@@ -31,6 +31,7 @@ public class TetrisPieceDisplayer extends JPanel{
             List<TetrisLayoutButton> row = new ArrayList<>();
             for(int j = 0; j < COLS; j++) {
                 TetrisLayoutButton cell = new TetrisLayoutButton(30, 30, i, j);
+                cell.setParentComponentRefernce(this);
                 cell.setInteractivity(false);
                 row.add(cell);
                 this.add(cell);

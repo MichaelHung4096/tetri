@@ -1,14 +1,19 @@
 package dev.coolname;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 public class TetrisLayoutButton extends JButton{
@@ -17,6 +22,7 @@ public class TetrisLayoutButton extends JButton{
     public static Border border = BorderFactory.createEmptyBorder(0, 0, 0, 0);
     public int mino = 0;
     private boolean isInteractable = true;
+    private Component parent;
 
 
     public TetrisLayoutButton(int width, int height, int row, int column) {
@@ -27,10 +33,13 @@ public class TetrisLayoutButton extends JButton{
         this.setText(Integer.toString(row * 100 + column));
         this.setBorder(border);
 
-        addActionListener();
-        addKeyListener();
+        addMouseListener();
 
 
+    }
+
+    public void setParentComponentRefernce(Component parent) {
+        this.parent = parent;
     }
 
     public int getId() {
@@ -81,31 +90,15 @@ public class TetrisLayoutButton extends JButton{
         TetrisLayoutButton.this.setText(Integer.toString(mino));
     }
 
-    private void addActionListener() {
-        this.addActionListener(new ActionListener() {
-        @Override
-        //TODO: manually clicking on a button will cause disjoint between what will display and board[i][j]. fix this somehow idk man not myh probelm good luck have fun
-        public void actionPerformed(ActionEvent e) {
-            setMino(TetrisLayoutButton.this.getMino()+ 1);
-            updateMino();
-        }
-    });
-    }
-
-
-    private void addKeyListener() {
-        this.addKeyListener(new KeyListener() {
-            public void keyPressed(KeyEvent e) {
-                System.out.println(TetrisLayoutButton.this.getId());
-            }
-            public void keyTyped(KeyEvent e) {
-                
-            }
-            public void keyReleased(KeyEvent e) {
-                System.out.println(e.getKeyChar());
+    private void addMouseListener() {
+        this.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                System.out.println("Cell: " + TetrisLayoutButton.this.getId());
+                parent.requestFocusInWindow();
             }
         });
     }
+
 
     public boolean getInteractivity() {
         return isInteractable;
