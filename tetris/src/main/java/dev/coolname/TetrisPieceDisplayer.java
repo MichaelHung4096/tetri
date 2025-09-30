@@ -1,10 +1,13 @@
 package dev.coolname;
 
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
 
 public class TetrisPieceDisplayer extends JPanel{
     private static final int ROWS = 3;
@@ -19,6 +22,8 @@ public class TetrisPieceDisplayer extends JPanel{
 
     public TetrisPieceDisplayer(int width, int height) {
         super(layout);
+        Border redBorder = BorderFactory.createLineBorder(Color.RED, 2);
+        this.setBorder(redBorder);
 
         initCells();
         initBoard();
@@ -54,6 +59,7 @@ public class TetrisPieceDisplayer extends JPanel{
     }
 
     private void updateBoardData() {
+        initBoard();
         int[][] displayData = piece.rotations[0];
         for(int i = 0; i < ROWS; i++) {
             if(i >= displayData.length) {continue;}

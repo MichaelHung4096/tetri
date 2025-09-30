@@ -64,22 +64,22 @@ public class TetrisLayoutButton extends JButton{
                 break;
 
             case 2:
-                this.setBackground(Color.ORANGE);
+                this.setBackground(Color.BLUE);
                 break;
             case 3:
-                this.setBackground(Color.BLUE);
+                this.setBackground(Color.ORANGE);
                 break;
             case 4:
                 this.setBackground(Color.GREEN);
                 break;
             case 5:
-                this.setBackground(Color.YELLOW);
+                this.setBackground(Color.RED);
                 break;
             case 6:
-                this.setBackground(Color.PINK);
+                this.setBackground(Color.YELLOW);
                 break;
             case 7:
-                this.setBackground(Color.RED);
+                this.setBackground(Color.PINK);
                 break;
         
             default:

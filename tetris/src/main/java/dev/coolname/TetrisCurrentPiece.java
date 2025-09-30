@@ -9,6 +9,7 @@ public class TetrisCurrentPiece {
     private int xCoord, yCoord;
     private int[][] localBoard = new int[TetrisBoard.ROWS][TetrisBoard.COLS];
     private TetrisBoard boardRef;
+    private int rotation = 0;
     public TetrisCurrentPiece() {
     }
 
@@ -36,6 +37,22 @@ public class TetrisCurrentPiece {
         return localBoard;
 
     }
+
+    public void counterClockwiseRotation() {
+        rotation = (rotation + 1) % 4;
+
+    }
+    
+    public void clockwiseRotation() {
+        rotation = (rotation + 3) % 4;
+
+    }
+
+    public int getRotation() {
+        return rotation;
+    }
+
+
 
 
 

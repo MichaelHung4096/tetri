@@ -96,7 +96,7 @@ public class TetrisBoard extends JPanel{
         int xCoord = currentPiece.getXCoord();
         int yCoord = currentPiece.getYCoord();
         TetrisPiece piece = currentPiece.getPiece();
-        int[][] relevantInfo = piece.rotations[0];
+        int[][] relevantInfo = piece.rotations[currentPiece.getRotation()];
         for(int i = 0; i < relevantInfo.length; i++) {
             for(int j = 0; j < relevantInfo[i].length; j++) {
                 
@@ -130,6 +130,17 @@ public class TetrisBoard extends JPanel{
                 }
                 if(e.getKeyChar() == 'd') {
                     currentPiece.setYCoord(currentPiece.getYCoord() + 1);
+                    displayBoard();
+                    displayCurrentPiece();
+                }
+                if(e.getKeyChar() == 'j') {
+                    currentPiece.counterClockwiseRotation();
+                    displayBoard();
+                    displayCurrentPiece();
+                }
+                
+                if(e.getKeyChar() == 'l') {
+                    currentPiece.clockwiseRotation();
                     displayBoard();
                     displayCurrentPiece();
                 }
