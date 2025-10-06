@@ -4,6 +4,7 @@ import java.awt.GridLayout;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import javax.swing.JPanel;
 
@@ -13,18 +14,39 @@ public class TetrisQueue extends JPanel{
     public static final GridLayout layout = new GridLayout(QUEUE_LENGTH, 1);
 
     private static final TetrisPiece[]   all_pieces = TetrisPiece.values();
-    private List<TetrisPiece> actually_all_pieces = Arrays.asList(all_pieces);
-    private List<TetrisPiece> queue = List.copyOf(actually_all_pieces);
+    private List<TetrisPiece> actually_all_pieces = new ArrayList<>(Arrays.asList(all_pieces));
+    private ArrayList<TetrisPiece> queue = new ArrayList<>(actually_all_pieces);
 
-    private List<TetrisPieceDisplayer> queue_displays = new ArrayList<>();
+    public List<TetrisPieceDisplayer> queue_displays = new ArrayList<>();
 
 
     public TetrisQueue(int width, int height) {
         super(layout);
 
         initQueueCells();
+        syncQueue();
 
-        queue_displays.get(2).updatePiece(TetrisPiece.O_PIECE);
+
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
+        this.addToQueue(generateBag());
     }
 
     public List<TetrisPiece> getQueue() {
@@ -39,8 +61,26 @@ public class TetrisQueue extends JPanel{
         return readableQueue;
     }
 
-    public void setQueue(List<TetrisPiece> someQueue)  {
+    public void setQueue(ArrayList<TetrisPiece> someQueue)  {
         queue = someQueue;
+    }
+
+    public void addToQueue(ArrayList<TetrisPiece> bag) {
+        queue.addAll(bag);
+    }
+
+    public void syncQueue() {
+        for(int i = 0; i < QUEUE_LENGTH; i++) {
+            queue_displays.get(i).updatePiece(queue.get(i));
+        }
+    }
+
+    public TetrisPiece removeFirstPiece() {
+        System.out.println(queue.get(0));
+        TetrisPiece newCurrentPiece = queue.remove(0);
+        System.out.println(queue.get(0));
+        syncQueue();
+        return newCurrentPiece;
     }
 
     public void initQueueCells() {
@@ -50,5 +90,18 @@ public class TetrisQueue extends JPanel{
             this.add(displayer);
         }
 
+    }
+
+    public List<TetrisPieceDisplayer> getQueueDisplayers() {
+        return queue_displays;
+    }
+
+
+    private ArrayList<TetrisPiece> generateBag() {
+
+        ArrayList<TetrisPiece> bag =  new ArrayList<>(Arrays.asList(all_pieces));
+        Collections.shuffle(bag);
+
+        return bag;
     }
 }

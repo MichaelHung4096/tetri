@@ -3,6 +3,9 @@ package dev.coolname;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.util.List;
+import java.lang.reflect.GenericArrayType;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 public class Main {
@@ -18,30 +21,37 @@ public class Main {
         frame = new JFrame("My First JFrame");
         frame.setLayout(new FlowLayout());
 
-        TetrisHold hold = new TetrisHold();
-
         
         TetrisBoard board = new TetrisBoard(30, 30);
         TetrisCurrentPiece currentPiece = new TetrisCurrentPiece();
+        TetrisHold hold = new TetrisHold();
+        TetrisQueue queue = new TetrisQueue(30, 30);
+
 
         board.setCurrentPieceRef(currentPiece);
         currentPiece.setBoardReference(board);
+        currentPiece.setQueueReference(queue);
 
         currentPiece.setPiece(TetrisPiece.S_PIECE);
 
 
-        board.insertPiece(TetrisPiece.L_PIECE.rotations[0], 0, 0);
+        board.insertPiece();
 
-        TetrisQueue queue = new TetrisQueue(30, 30);
+        
 
-        hold.setAlignmentY(Component.TOP_ALIGNMENT);
 ;
         frame.add(hold);
         frame.add(board);
         frame.add(queue);
 
+        queue.syncQueue();
 
-        System.out.println(queue.getReadableQueue());
+
+
+
+
+
+
 
 
 

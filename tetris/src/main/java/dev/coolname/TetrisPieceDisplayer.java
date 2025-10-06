@@ -28,7 +28,6 @@ public class TetrisPieceDisplayer extends JPanel{
         initCells();
         initBoard();
 
-        updatePiece(TetrisPiece.I_PIECE);
     }
 
     private void initCells() {
@@ -54,8 +53,12 @@ public class TetrisPieceDisplayer extends JPanel{
 
     }
 
-    private void setPiece(TetrisPiece piece) {
+    public void setPiece(TetrisPiece piece) {
         this.piece = piece;
+    }
+    
+    public TetrisPiece getPiece() {
+        return piece;
     }
 
     private void updateBoardData() {

@@ -6,10 +6,12 @@ package dev.coolname;
 
 public class TetrisCurrentPiece {
     private TetrisPiece piece;
-    private int xCoord, yCoord;
+    private int xCoord = 5;
+    private int yCoord = 5;
     private int[][] localBoard = new int[TetrisBoard.ROWS][TetrisBoard.COLS];
     private TetrisBoard boardRef;
     private int rotation = 0;
+    private TetrisQueue queueRef;
     public TetrisCurrentPiece() {
     }
 
@@ -25,28 +27,53 @@ public class TetrisCurrentPiece {
     public void setBoardReference(TetrisBoard boardRef) {
         this.boardRef = boardRef;
     } 
+    public void setQueueReference(TetrisQueue queueRef) {
+        this.queueRef = queueRef;
+    }
 
 
-    public int[][] insertPiece(int[][] piece, int x, int y) {
+    public int[][] insertPiece() {
         localBoard = boardRef.getBoard().clone();
-        for(int i = 0; i < piece.length; i++) {
-            for(int j = 0; j < piece[0].length; j++) {
-                localBoard[x+i][y+j] = piece[i][j];
+
+        for(int i = 0; i < piece.rotations[rotation].length; i++) {
+            for(int j = 0; j < piece.rotations[rotation].length; j++) {
+                localBoard[xCoord+i][yCoord+j] = piece.rotations[rotation][i][j];
             }
         }
+
+        resetPieceStuff();
+        updateCurrentPiece();
+
         return localBoard;
 
+    }
+
+    private void resetPieceStuff() {
+
+        xCoord = 0;
+        yCoord = 0;
+        rotation = 0;
+    }
+
+    private void updateCurrentPiece() { //from queeuue right now
+        piece = queueRef.removeFirstPiece();
+        
     }
 
     public void counterClockwiseRotation() {
         rotation = (rotation + 1) % 4;
 
     }
+
+    public void OneEightyRotation() {
+        rotation = (rotation + 2) % 4;
+    }
     
     public void clockwiseRotation() {
         rotation = (rotation + 3) % 4;
 
     }
+
 
     public int getRotation() {
         return rotation;

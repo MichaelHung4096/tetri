@@ -75,8 +75,8 @@ public class TetrisBoard extends JPanel{
         return board;
     }
 
-    public void insertPiece(int[][] piece, int x, int y) {
-        board = currentPiece.insertPiece(piece, x, y);
+    public void insertPiece() {
+        board = currentPiece.insertPiece();
         displayBoard();
 
     }
@@ -112,6 +112,7 @@ public class TetrisBoard extends JPanel{
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                //TODO: convert this to switcdh statements for the love of god holy moly
                 System.out.println("Key pressed parent: " + e.getKeyChar());
                 if(e.getKeyChar() == 'w') {
                     currentPiece.setXCoord(currentPiece.getXCoord() - 1);
@@ -143,6 +144,21 @@ public class TetrisBoard extends JPanel{
                     currentPiece.clockwiseRotation();
                     displayBoard();
                     displayCurrentPiece();
+                }
+
+                if(e.getKeyCode() == 16) {
+                    currentPiece.OneEightyRotation();
+                    displayBoard();
+                    displayCurrentPiece();
+
+                }
+
+                
+                if(e.getKeyCode() == 32) {
+                    currentPiece.insertPiece();
+                    displayBoard();
+                    displayCurrentPiece();
+
                 }
 
             }
