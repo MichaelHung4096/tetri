@@ -29,6 +29,7 @@ public class Main {
 
 
         board.setCurrentPieceRef(currentPiece);
+        board.setQueueReference(queue);
         currentPiece.setBoardReference(board);
         currentPiece.setQueueReference(queue);
 

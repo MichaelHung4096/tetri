@@ -11,7 +11,7 @@ public class TetrisCurrentPiece {
     private int[][] localBoard = new int[TetrisBoard.ROWS][TetrisBoard.COLS];
     private TetrisBoard boardRef;
     private int rotation = 0;
-    private TetrisQueue queueRef;
+    private TetrisQueue queue;
     public TetrisCurrentPiece() {
     }
 
@@ -28,16 +28,24 @@ public class TetrisCurrentPiece {
         this.boardRef = boardRef;
     } 
     public void setQueueReference(TetrisQueue queueRef) {
-        this.queueRef = queueRef;
+        this.queue = queueRef;
     }
 
 
     public int[][] insertPiece() {
         localBoard = boardRef.getBoard().clone();
+        int[][] data = piece.rotations[rotation];
 
-        for(int i = 0; i < piece.rotations[rotation].length; i++) {
-            for(int j = 0; j < piece.rotations[rotation].length; j++) {
-                localBoard[xCoord+i][yCoord+j] = piece.rotations[rotation][i][j];
+
+        while(true) {
+            if(!changeCoord(0, 1)) break;
+
+        }
+
+        for(int i = 0; i < data.length; i++) {
+            for(int j = 0; j < data.length; j++) {
+                if(data[i][j] == 0) continue;
+                localBoard[yCoord+i][xCoord+j] = data[i][j];
             }
         }
 
@@ -50,13 +58,13 @@ public class TetrisCurrentPiece {
 
     private void resetPieceStuff() {
 
-        xCoord = 0;
+        xCoord = 2;
         yCoord = 0;
         rotation = 0;
     }
 
     private void updateCurrentPiece() { //from queeuue right now
-        piece = queueRef.removeFirstPiece();
+        piece = queue.removeFirstPiece();
         
     }
 
@@ -90,16 +98,86 @@ public class TetrisCurrentPiece {
     public int getXCoord() {
         return xCoord;
     }
-    public void setXCoord(int newX) {
-        xCoord = newX;
-    }
 
     public int getYCoord() {
         return yCoord;
 
     }
 
-    public void setYCoord(int newY) {
-        yCoord = newY;
+
+    public boolean changeCoord(int xChange, int yChange) {
+        xCoord += xChange;
+        yCoord += yChange;
+        if(isColliding()) {
+            xCoord -= xChange;
+            yCoord -= yChange;
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isColliding() {
+        int[][] data =piece.rotations[rotation];
+        localBoard = boardRef.getBoard();
+
+        for(int i = 0; i < data.length; i++) {
+            for(int j = 0; j < data.length; j++) {
+                //bounds collision detection
+                if(j + xCoord < 0) {
+
+                    if(data[i][j] != 0) {
+                        System.out.println("left: fck u");
+                        return true;
+                    }
+                    
+                    if(data[i][j] == 0) {
+                        System.out.println("left: gotchu");
+                    }
+                }
+
+                if(j + xCoord >= TetrisBoard.COLS) {
+                    if(data[i][j] != 0) {
+                        System.out.println("right: fck u");
+                        return true;
+                    }
+                    
+                    if(data[i][j] == 0) {
+                        System.out.println("right: gotchu");
+                    }
+                }
+
+                if(i + yCoord >= TetrisBoard.ROWS) {
+                    if(data[i][j] != 0) {
+                        System.out.println("down:fck u");
+                        return true;
+                    }
+                    
+                    if(data[i][j] == 0) {
+                        System.out.println("down: gotchu");
+                    }
+                }
+
+                if(i + yCoord < 0) {
+                    if(data[i][j] != 0) {
+                        System.out.println("up:fck u");
+                        return true;
+                    }
+                    
+                    if(data[i][j] == 0) {
+                        System.out.println("up:gotchu");
+                    }
+                }
+
+
+                //block collision detection
+                if(data[i][j] != 0) {
+                    if(localBoard[yCoord + i][xCoord + j] != 0) {
+                        System.out.println("WEEEWOOOWOOOWOWOWWOWOWOWOWOWOW");
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

@@ -13,14 +13,12 @@ public class TetrisBoard extends JPanel{
     public static final int COLS = 10;
     public static final GridLayout layout  = new GridLayout(ROWS, COLS);
 
-    public static int temp = 0;
-    //TODO: remove ^^^ later
-
 
 
     private int board[][] = new int[ROWS][COLS];
     private List<List<TetrisLayoutButton>> displayBoard = new ArrayList<>();
     private TetrisCurrentPiece currentPiece;
+    private TetrisQueue queue;
 
 
 
@@ -40,6 +38,10 @@ public class TetrisBoard extends JPanel{
     public void setCurrentPieceRef(TetrisCurrentPiece currentPiece) {
         this.currentPiece = currentPiece;
     } 
+    public void setQueueReference(TetrisQueue queue) {
+        this.queue = queue;
+    }
+
 
     private void initBoard() {
         for(int i = 0; i < ROWS; i++) {
@@ -99,8 +101,9 @@ public class TetrisBoard extends JPanel{
         int[][] relevantInfo = piece.rotations[currentPiece.getRotation()];
         for(int i = 0; i < relevantInfo.length; i++) {
             for(int j = 0; j < relevantInfo[i].length; j++) {
+                if(relevantInfo[i][j] == 0) continue;
                 
-                TetrisLayoutButton cell =  displayBoard.get(xCoord + i).get(yCoord + j);
+                TetrisLayoutButton cell =  displayBoard.get(yCoord + i).get(xCoord + j);
                 cell.setMino(relevantInfo[i][j]);
                 cell.updateMino();
             }
@@ -113,34 +116,33 @@ public class TetrisBoard extends JPanel{
             @Override
             public void keyPressed(KeyEvent e) {
                 //TODO: convert this to switcdh statements for the love of god holy moly
-                System.out.println("Key pressed parent: " + e.getKeyChar());
-                if(e.getKeyChar() == 'w') {
-                    currentPiece.setXCoord(currentPiece.getXCoord() - 1);
+                if(e.getKeyChar() == 'j') { //left
+                    currentPiece.changeCoord(-1, 0);
                     displayBoard();
                     displayCurrentPiece();
                 }
-                if(e.getKeyChar() == 's') {
-                    currentPiece.setXCoord(currentPiece.getXCoord() + 1);
+                if(e.getKeyChar() == 'l') { //right
+                    currentPiece.changeCoord(1, 0);
+                    displayBoard();
+                    displayCurrentPiece();
+                }
+                if(e.getKeyChar() == 'u') { //up
+                    currentPiece.changeCoord(0, -1);
+                    displayBoard();
+                    displayCurrentPiece();
+                }
+                if(e.getKeyChar() == ';') {//down
+                    currentPiece.changeCoord(0, 1);
                     displayBoard();
                     displayCurrentPiece();
                 }
                 if(e.getKeyChar() == 'a') {
-                    currentPiece.setYCoord(currentPiece.getYCoord() - 1);
-                    displayBoard();
-                    displayCurrentPiece();
-                }
-                if(e.getKeyChar() == 'd') {
-                    currentPiece.setYCoord(currentPiece.getYCoord() + 1);
-                    displayBoard();
-                    displayCurrentPiece();
-                }
-                if(e.getKeyChar() == 'j') {
                     currentPiece.counterClockwiseRotation();
                     displayBoard();
                     displayCurrentPiece();
                 }
                 
-                if(e.getKeyChar() == 'l') {
+                if(e.getKeyChar() == 's') {
                     currentPiece.clockwiseRotation();
                     displayBoard();
                     displayCurrentPiece();
@@ -154,7 +156,7 @@ public class TetrisBoard extends JPanel{
                 }
 
                 
-                if(e.getKeyCode() == 32) {
+                if(e.getKeyCode() == 75) {
                     currentPiece.insertPiece();
                     displayBoard();
                     displayCurrentPiece();
