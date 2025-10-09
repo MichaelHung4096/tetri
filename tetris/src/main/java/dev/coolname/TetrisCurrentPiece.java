@@ -1,7 +1,5 @@
 package dev.coolname;
 
-//TODO: what i want is for current piece to handle the collisions and kicktabel, whereas board to display everytihng
-
 
 
 public class TetrisCurrentPiece {
@@ -11,6 +9,8 @@ public class TetrisCurrentPiece {
     private int[][] localBoard = new int[TetrisBoard.ROWS][TetrisBoard.COLS];
     private TetrisBoard boardRef;
     private int rotation = 0;
+    private int prevRotation;
+    private Integer kicktableKey;
     private TetrisQueue queue;
     public TetrisCurrentPiece() {
     }
@@ -61,6 +61,7 @@ public class TetrisCurrentPiece {
         xCoord = 2;
         yCoord = 0;
         rotation = 0;
+        prevRotation = 0;
     }
 
     private void updateCurrentPiece() { //from queeuue right now
@@ -68,31 +69,33 @@ public class TetrisCurrentPiece {
         
     }
 
-    public void counterClockwiseRotation() {
-        rotation = (rotation + 1) % 4;
+    public void rotatePiece(int rotate) {
+        System.out.println("current rotate: " + rotation);
+        int tempPrevRot = prevRotation;
+        prevRotation = rotation;
+        rotation = (rotation + rotate) % 4;
+        kicktableKey = prevRotation*10 + rotation;
+        int[][] kicktable = piece.kicktable.get(kicktableKey);
+        for(int i = 0; i < kicktable.length; i++) {
 
+            changeCoord(kicktable[i][0], kicktable[i][1]);
+            if(isColliding()) {
+                changeCoord(-1*kicktable[i][0], -1*kicktable[i][1]);
+            }
+            else {
+                System.out.println("rotation successful, new rotation: " + rotation);
+                return;
+            }
+        }
+        System.out.println("rotation unsuccesful");
+        System.out.println("prevRotate: " + tempPrevRot);
+        rotation = (rotation + (4-rotate)) % 4;
+        prevRotation = tempPrevRot;
     }
-
-    public void OneEightyRotation() {
-        rotation = (rotation + 2) % 4;
-    }
-    
-    public void clockwiseRotation() {
-        rotation = (rotation + 3) % 4;
-
-    }
-
 
     public int getRotation() {
         return rotation;
     }
-
-
-
-
-
-
-
 
 
     public int getXCoord() {
@@ -126,45 +129,45 @@ public class TetrisCurrentPiece {
                 if(j + xCoord < 0) {
 
                     if(data[i][j] != 0) {
-                        System.out.println("left: fck u");
+                       // System.out.println("left: fck u");
                         return true;
                     }
                     
                     if(data[i][j] == 0) {
-                        System.out.println("left: gotchu");
+                       // System.out.println("left: gotchu");
                     }
                 }
 
                 if(j + xCoord >= TetrisBoard.COLS) {
                     if(data[i][j] != 0) {
-                        System.out.println("right: fck u");
+                     //   System.out.println("right: fck u");
                         return true;
                     }
                     
                     if(data[i][j] == 0) {
-                        System.out.println("right: gotchu");
+                     //   System.out.println("right: gotchu");
                     }
                 }
 
                 if(i + yCoord >= TetrisBoard.ROWS) {
                     if(data[i][j] != 0) {
-                        System.out.println("down:fck u");
+                       // System.out.println("down:fck u");
                         return true;
                     }
                     
                     if(data[i][j] == 0) {
-                        System.out.println("down: gotchu");
+                      //  System.out.println("down: gotchu");
                     }
                 }
 
                 if(i + yCoord < 0) {
                     if(data[i][j] != 0) {
-                        System.out.println("up:fck u");
+                       // System.out.println("up:fck u");
                         return true;
                     }
                     
                     if(data[i][j] == 0) {
-                        System.out.println("up:gotchu");
+                       // System.out.println("up:gotchu");
                     }
                 }
 
@@ -172,7 +175,7 @@ public class TetrisCurrentPiece {
                 //block collision detection
                 if(data[i][j] != 0) {
                     if(localBoard[yCoord + i][xCoord + j] != 0) {
-                        System.out.println("WEEEWOOOWOOOWOWOWWOWOWOWOWOWOW");
+                       // System.out.println("WEEEWOOOWOOOWOWOWWOWOWOWOWOWOW");
                         return true;
                     }
                 }

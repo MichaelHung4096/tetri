@@ -137,19 +137,19 @@ public class TetrisBoard extends JPanel{
                     displayCurrentPiece();
                 }
                 if(e.getKeyChar() == 'a') {
-                    currentPiece.counterClockwiseRotation();
+                    currentPiece.rotatePiece(1);
                     displayBoard();
                     displayCurrentPiece();
                 }
                 
                 if(e.getKeyChar() == 's') {
-                    currentPiece.clockwiseRotation();
+                    currentPiece.rotatePiece(3);
                     displayBoard();
                     displayCurrentPiece();
                 }
 
                 if(e.getKeyCode() == 16) {
-                    currentPiece.OneEightyRotation();
+                    currentPiece.rotatePiece(2);
                     displayBoard();
                     displayCurrentPiece();
 
