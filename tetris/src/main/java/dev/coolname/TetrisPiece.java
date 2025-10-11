@@ -31,7 +31,7 @@ public enum TetrisPiece {
                                                  {0,0,1,0}}
 
 
-                                                }, TetrisPiece.createJLSTZMap()),
+                                                }, TetrisPiece.createIMap()),
     J_PIECE(2, 'J', Color.BLUE, new int[][][] {
                                                     {{2,0,0},
                                                      {2,2,2},
@@ -113,7 +113,7 @@ public enum TetrisPiece {
                                                      {6,6}},
                                                      {{6,6},
                                                      {6,6}}
-                                                    }, TetrisPiece.createJLSTZMap()),
+                                                    }, TetrisPiece.createOMap()),
     T_PIECE(7, 'T', Color.PINK, new int[][][] {
                                                     {{0,7,0},
                                                      {7,7,7},
@@ -157,20 +157,65 @@ public enum TetrisPiece {
         map.put(10, new int[][]{{0,0}, {-1, 0}, {-1,1}, {0, -2}, {-1, -2}});
         map.put(1, new int[][]{{0,0}, {1, 0}, {1,-1}, {0, 2}, {1, 2}});
 
-        map.put(2, new int[][]{{0,0}});
-        map.put(20, new int[][]{{0,0}});
-        map.put(13, new int[][]{{0,0}});
-        map.put(31, new int[][]{{0,0}});
+
+
+        map.put(2, new int[][]{{0,0}, {0, -1}, {1, -1}, {-1,-1}, {1, 0}, {-1,0}});
+        map.put(20, new int[][]{{0,0}, {0, 1}, {-1, 1}, {1,1}, {-1, 0}, {1,0}});
+
+        map.put(13, new int[][]{{0,0}, {-1,0}, {-1,-2}, {-1,-1}, {0,-2}, {0,-1}});
+        map.put(31, new int[][]{{0,0}, {1,0}, {1,-2}, {1, -1}, {0, -2}, {0, -1}});
 
         return map;
     }
 
-    private HashMap<Integer, int[][]> createOMap() { return createJLSTZMap();}
 
-    private HashMap<Integer, int[][]> createIMap() { return createJLSTZMap();}
+    //this is stupid 
+    private static HashMap<Integer, int[][]> createOMap() {
+        HashMap<Integer, int[][]> map = new HashMap<>();
+                
+        map.put(3, new int[][]{{0,0}});
+        map.put(32, new int[][]{{0,0}});
+        map.put(31, new int[][]{{0,0}});
+        map.put(30, new int[][]{{0,0}});
+
+        map.put(2, new int[][]{{0,0}});
+        map.put(23, new int[][]{{0,0}});
+        map.put(21, new int[][]{{0,0}});
+        map.put(20, new int[][]{{0,0}});
+
+        map.put(1, new int[][]{{0,0}});
+        map.put(13, new int[][]{{0,0}});
+        map.put(12, new int[][]{{0,0}});
+        map.put(10, new int[][]{{0,0}});
+ 
+        return map;}
+
+    private static HashMap<Integer, int[][]> createIMap() { 
+        HashMap<Integer, int[][]> map = new HashMap<>();
+
+        map.put(3, new int[][]{{0,0}, {-2,0}, {1,0}, {-2,1}, {1,-2}});
+        map.put(30, new int[][]{{0,0}, {2,0}, {-1,0}, {2, -1}, {-1,2}});
+
+        map.put(32, new int[][]{{0,0}, {-1,0}, {2,0}, {-1,-2}, {2,1}});
+        map.put(23, new int[][]{{0,0}, {1,0}, {-2,0}, {1,2}, {-2,-1}});
+
+        map.put(21, new int[][]{{0,0}, {2,0}, {-1, 0}, {2,-1}, {-1,2}});
+        map.put(12, new int[][]{{0,0}, {-2,0}, {1,0}, {-2,1}, {1,-2}});
+
+        
+        map.put(10, new int[][]{{0,0}, {1,0}, {-2,0}, {1,2}, {-2,-1}});
+        map.put(1, new int[][]{{0,0}, {-1,0}, {2,0}, {-1,-2}, {2,1}});
 
 
-    //TetrisPiece(int solidID, int ghostID, int[][][] rotations, int[][][] kicktable, Color color) {} <- what final thing should look like
+        map.put(2, new int[][]{{0,0}, {0, -1}, {1, -1}, {-1,-1}, {1, 0}, {-1,0}});
+        map.put(20, new int[][]{{0,0}, {0, 1}, {-1, 1}, {1,1}, {-1, 0}, {1,0}});
+
+        map.put(13, new int[][]{{0,0}, {-1,0}, {-1,-2}, {-1,-1}, {0,-2}, {0,-1}});
+        map.put(31, new int[][]{{0,0}, {1,0}, {1,-2}, {1, -1}, {0, -2}, {0, -1}});
+        
+
+        return map;}
+
     TetrisPiece(int solidID, char charID, Color color, int[][][] rotations, HashMap<Integer, int[][]> kicktable)  {
         this.solidID = solidID;
         this.color = color;

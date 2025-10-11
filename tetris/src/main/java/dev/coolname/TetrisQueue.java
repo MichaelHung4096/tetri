@@ -76,9 +76,9 @@ public class TetrisQueue extends JPanel{
     }
 
     public TetrisPiece removeFirstPiece() {
-        System.out.println(queue.get(0));
+        //System.out.println(queue.get(0));
         TetrisPiece newCurrentPiece = queue.remove(0);
-        System.out.println(queue.get(0));
+        //System.out.println(queue.get(0));
         syncQueue();
         return newCurrentPiece;
     }

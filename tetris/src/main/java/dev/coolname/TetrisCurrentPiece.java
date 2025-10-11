@@ -58,7 +58,7 @@ public class TetrisCurrentPiece {
 
     private void resetPieceStuff() {
 
-        xCoord = 2;
+        xCoord = 3;
         yCoord = 0;
         rotation = 0;
         prevRotation = 0;
@@ -70,25 +70,21 @@ public class TetrisCurrentPiece {
     }
 
     public void rotatePiece(int rotate) {
-        System.out.println("current rotate: " + rotation);
         int tempPrevRot = prevRotation;
         prevRotation = rotation;
         rotation = (rotation + rotate) % 4;
         kicktableKey = prevRotation*10 + rotation;
         int[][] kicktable = piece.kicktable.get(kicktableKey);
-        for(int i = 0; i < kicktable.length; i++) {
+        
 
-            changeCoord(kicktable[i][0], kicktable[i][1]);
-            if(isColliding()) {
-                changeCoord(-1*kicktable[i][0], -1*kicktable[i][1]);
-            }
-            else {
-                System.out.println("rotation successful, new rotation: " + rotation);
+
+        for(int i = 0; i < kicktable.length; i++) { 
+            if (changeCoord(kicktable[i][0], kicktable[i][1])) {
                 return;
-            }
+            }     
         }
-        System.out.println("rotation unsuccesful");
-        System.out.println("prevRotate: " + tempPrevRot);
+        
+        
         rotation = (rotation + (4-rotate)) % 4;
         prevRotation = tempPrevRot;
     }
