@@ -105,14 +105,22 @@ public enum TetrisPiece {
 
                                                 }, TetrisPiece.createJLSTZMap()),
     O_PIECE(6, 'O', Color.YELLOW, new int[][][] {
-                                                    {{6,6},
-                                                     {6,6}},
-                                                     {{6,6},
-                                                     {6,6}},
-                                                     {{6,6},
-                                                     {6,6}},
-                                                     {{6,6},
-                                                     {6,6}}
+                                                    {{0,6,6},
+                                                     {0,6,6},
+                                                     {0,0,0}
+                                                    },
+                                                    {{0,6,6},
+                                                     {0,6,6},
+                                                     {0,0,0}
+                                                    },
+                                                    {{0,6,6},
+                                                     {0,6,6},
+                                                     {0,0,0}
+                                                    },
+                                                    {{0,6,6},
+                                                     {0,6,6},
+                                                     {0,0,0}
+                                                    },
                                                     }, TetrisPiece.createOMap()),
     T_PIECE(7, 'T', Color.PINK, new int[][][] {
                                                     {{0,7,0},

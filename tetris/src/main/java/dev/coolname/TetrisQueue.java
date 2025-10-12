@@ -14,8 +14,7 @@ public class TetrisQueue extends JPanel{
     public static final GridLayout layout = new GridLayout(QUEUE_LENGTH, 1);
 
     private static final TetrisPiece[]   all_pieces = TetrisPiece.values();
-    private List<TetrisPiece> actually_all_pieces = new ArrayList<>(Arrays.asList(all_pieces));
-    private ArrayList<TetrisPiece> queue = new ArrayList<>(actually_all_pieces);
+    private ArrayList<TetrisPiece> queue = new ArrayList<>();
 
     public List<TetrisPieceDisplayer> queue_displays = new ArrayList<>();
 
@@ -24,29 +23,9 @@ public class TetrisQueue extends JPanel{
         super(layout);
 
         initQueueCells();
+        addToQueue();
         syncQueue();
 
-
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
-        this.addToQueue(generateBag());
     }
 
     public List<TetrisPiece> getQueue() {
@@ -65,9 +44,15 @@ public class TetrisQueue extends JPanel{
         queue = someQueue;
     }
 
-    public void addToQueue(ArrayList<TetrisPiece> bag) {
-        queue.addAll(bag);
+    public void addToQueue() {
+        int length = queue.size();
+        while(length <= 2*QUEUE_LENGTH) {
+            ArrayList<TetrisPiece> bag = generateBag();
+            queue.addAll(bag);
+            length = queue.size();
+        }
     }
+    
 
     public void syncQueue() {
         for(int i = 0; i < QUEUE_LENGTH; i++) {
