@@ -30,14 +30,13 @@ public class Main {
 
         board.setCurrentPieceRef(currentPiece);
         board.setQueueReference(queue);
+        board.setHoldReference(hold);
+
         currentPiece.setBoardReference(board);
         currentPiece.setQueueReference(queue);
-
-        currentPiece.setPiece(TetrisPiece.S_PIECE);
-
-
-        board.insertPiece();
-
+        currentPiece.setHoldReference(hold);
+        
+        currentPiece.updateCurrentPiece();
         
 
 ;

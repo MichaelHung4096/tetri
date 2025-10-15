@@ -19,6 +19,7 @@ public class TetrisBoard extends JPanel{
     private List<List<TetrisLayoutButton>> displayBoard = new ArrayList<>();
     private TetrisCurrentPiece currentPiece;
     private TetrisQueue queue;
+    private TetrisHold hold;
 
 
 
@@ -40,6 +41,9 @@ public class TetrisBoard extends JPanel{
     } 
     public void setQueueReference(TetrisQueue queue) {
         this.queue = queue;
+    }
+    public void setHoldReference(TetrisHold hold) {
+        this.hold = hold;
     }
 
 
@@ -83,7 +87,7 @@ public class TetrisBoard extends JPanel{
 
     }
 
-    private void displayBoard() {
+    public void displayBoard() {
 
         for(int i = 0; i < ROWS; i++) {
             for(int j = 0; j < COLS; j++) {
@@ -94,7 +98,7 @@ public class TetrisBoard extends JPanel{
         }
     }
 
-    private void displayCurrentPiece() {
+    public void displayCurrentPiece() {
         int xCoord = currentPiece.getXCoord();
         int yCoord = currentPiece.getYCoord();
         TetrisPiece piece = currentPiece.getPiece();
@@ -148,6 +152,10 @@ public class TetrisBoard extends JPanel{
                     displayCurrentPiece();
                 }
 
+                if(e.getKeyChar() == 'd') {
+                    currentPiece.holdPiece();
+                }
+
                 if(e.getKeyCode() == 16) {
                     currentPiece.rotatePiece(2);
                     displayBoard();
@@ -158,6 +166,7 @@ public class TetrisBoard extends JPanel{
                 
                 if(e.getKeyCode() == 75) {
                     currentPiece.insertPiece();
+                    queue.addToQueue();
                     displayBoard();
                     displayCurrentPiece();
 

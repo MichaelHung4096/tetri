@@ -1,17 +1,20 @@
 package dev.coolname;
 
-
+import java.util.ArrayList;
 
 public class TetrisCurrentPiece {
     private TetrisPiece piece;
     private int xCoord = 5;
     private int yCoord = 5;
     private int[][] localBoard = new int[TetrisBoard.ROWS][TetrisBoard.COLS];
-    private TetrisBoard boardRef;
+    private TetrisBoard board;
     private int rotation = 0;
     private int prevRotation;
     private Integer kicktableKey;
     private TetrisQueue queue;
+    private TetrisHold hold;
+
+
     public TetrisCurrentPiece() {
     }
 
@@ -25,15 +28,18 @@ public class TetrisCurrentPiece {
     }
 
     public void setBoardReference(TetrisBoard boardRef) {
-        this.boardRef = boardRef;
+        this.board = boardRef;
     } 
     public void setQueueReference(TetrisQueue queueRef) {
         this.queue = queueRef;
     }
+    public void setHoldReference(TetrisHold holdRef) {
+        this.hold = holdRef;
+    }
 
 
     public int[][] insertPiece() {
-        localBoard = boardRef.getBoard().clone();
+        localBoard = board.getBoard().clone();
         int[][] data = piece.rotations[rotation];
 
 
@@ -49,12 +55,48 @@ public class TetrisCurrentPiece {
             }
         }
 
+
+        clearLines();
         resetPieceStuff();
         updateCurrentPiece();
 
         return localBoard;
 
     }
+
+    private void clearLines() {
+        localBoard = board.getBoard().clone();
+                // Start from bottom row and go upward
+        for (int r = TetrisBoard.ROWS - 1; r >= 0; r--) {
+            if (isLineFull(r)) {
+                removeLine(r);
+                r++; // Recheck the same row index (since rows above moved down)
+            }
+        }
+    }
+
+    private boolean isLineFull(int row) {
+        for (int c = 0; c < TetrisBoard.COLS; c++) {
+            if (localBoard[row][c] == 0) return false;
+        }
+        return true;
+    }
+
+
+    private void removeLine(int line) {
+        // Move every row above `line` one step down
+        for (int r = line; r > 0; r--) {
+            System.arraycopy(localBoard[r - 1], 0, localBoard[r], 0, TetrisBoard.COLS);
+        }
+
+        // Clear the top row
+        for (int c = 0; c < TetrisBoard.COLS; c++) {
+            localBoard[0][c] = 0;
+        }
+    }
+
+
+
 
     private void resetPieceStuff() {
 
@@ -64,9 +106,26 @@ public class TetrisCurrentPiece {
         prevRotation = 0;
     }
 
-    private void updateCurrentPiece() { //from queeuue right now
+    public void updateCurrentPiece() { //from queeuue right now
         piece = queue.removeFirstPiece();
         
+    }
+
+    public void holdPiece() {
+        TetrisPiece heldPiece = hold.getPiece();
+        if(heldPiece == null) {
+            System.out.println("no piece in hold");
+            hold.setPiece(piece);
+            updateCurrentPiece();
+        }
+        else {
+            hold.setPiece(piece);
+            setPiece(heldPiece);
+        }
+        
+        resetPieceStuff();
+        board.displayBoard();
+        board.displayCurrentPiece();
     }
 
     public void rotatePiece(int rotate) {
@@ -117,7 +176,7 @@ public class TetrisCurrentPiece {
 
     private boolean isColliding() {
         int[][] data =piece.rotations[rotation];
-        localBoard = boardRef.getBoard();
+        localBoard = board.getBoard();
 
         for(int i = 0; i < data.length; i++) {
             for(int j = 0; j < data.length; j++) {
