@@ -10,9 +10,9 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 
 public class TetrisPieceDisplayer extends JPanel{
-    private static final int ROWS = 3;
-    private static final int COLS = 4;
-    private static final GridLayout layout = new GridLayout(ROWS, COLS);
+    public static final int ROWS = 3;
+    public static final int COLS = 4;
+    public static final GridLayout layout = new GridLayout(ROWS, COLS);
 
 
     
@@ -34,7 +34,7 @@ public class TetrisPieceDisplayer extends JPanel{
         for(int i = 0; i < ROWS; i++) {
             List<TetrisLayoutButton> row = new ArrayList<>();
             for(int j = 0; j < COLS; j++) {
-                TetrisLayoutButton cell = new TetrisLayoutButton(30, 30, i, j);
+                TetrisLayoutButton cell = new TetrisLayoutButton(TetrisBoard.CELL_SIZE, TetrisBoard.CELL_SIZE, i, j);
                 cell.setParentComponentRefernce(this);
                 cell.setInteractivity(false);
                 row.add(cell);

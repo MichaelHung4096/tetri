@@ -13,7 +13,7 @@ public class TetrisHold extends JPanel {
     }
 
     public void initHold() {
-        displayer = new TetrisPieceDisplayer(30, 30);
+        displayer = new TetrisPieceDisplayer(TetrisBoard.CELL_SIZE, TetrisBoard.CELL_SIZE);
         this.add(displayer);
     }
 
@@ -23,6 +23,7 @@ public class TetrisHold extends JPanel {
     }
     public TetrisPiece getPiece() {
         return piece;
+        
     }
 
 

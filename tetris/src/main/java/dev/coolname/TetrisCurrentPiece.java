@@ -164,6 +164,7 @@ public class TetrisCurrentPiece {
 
 
     public boolean changeCoord(int xChange, int yChange) {
+        //System.out.println(System.currentTimeMillis());
         xCoord += xChange;
         yCoord += yChange;
         if(isColliding()) {

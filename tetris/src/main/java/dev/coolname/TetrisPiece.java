@@ -2,7 +2,6 @@ package dev.coolname;
 
 import java.awt.Color;
 import java.util.HashMap;
-import java.util.Map;
 
 public enum TetrisPiece {
     

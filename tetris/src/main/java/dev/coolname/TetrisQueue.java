@@ -70,7 +70,7 @@ public class TetrisQueue extends JPanel{
 
     public void initQueueCells() {
         for(int i = 0; i < QUEUE_LENGTH; i++) {
-            TetrisPieceDisplayer displayer = new TetrisPieceDisplayer(30, 30);
+            TetrisPieceDisplayer displayer = new TetrisPieceDisplayer(TetrisBoard.CELL_SIZE, TetrisBoard.CELL_SIZE);
             queue_displays.add(displayer);
             this.add(displayer);
         }
