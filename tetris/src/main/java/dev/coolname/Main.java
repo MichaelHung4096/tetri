@@ -24,7 +24,7 @@ public class Main {
 
         TetrisFrame pan = new TetrisFrame();
         //pan.setVisible(true);
-        Dimension d = new Dimension((TetrisBoard.COLS + 10) * TetrisBoard.CELL_SIZE, TetrisBoard.ROWS * TetrisBoard.CELL_SIZE);
+        Dimension d = new Dimension((TetrisFrame.COLS + 10) * TetrisFrame.CELL_SIZE, TetrisFrame.ROWS * TetrisFrame.CELL_SIZE);
         pan.setPreferredSize(d);
         pan.setBackground(Color.BLACK);
         frame.add(pan);

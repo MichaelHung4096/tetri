@@ -17,15 +17,17 @@ public class TetrisFrame extends JPanel implements Runnable{
     private Thread thread;
     private boolean running = false;
     public long sleep = 1;
+    public long last;
 
     public static final int ROWS = 20;
     public static final int COLS = 10;
     public static final int CELL_SIZE = 30;
 
-    public static int DAS = 65;
-    public int DAS_timer = DAS;
+    public static int DAS = 80;
     public static int ARR = 0;
     public int ARR_timer = ARR;
+    public static int SDF = 0;
+    public int SDF_timer = SDF;
     //public static int DAS_DIRECTION = 0;
 
     public static final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
@@ -46,8 +48,11 @@ public class TetrisFrame extends JPanel implements Runnable{
     public ArrayList<TetrisPiece> queue = new ArrayList<>();
 
     private TetrisPiece currentPiece;
+    private TetrisPiece ghostPiece;
     private int xCoord = 3;
     private int yCoord = 0;
+    private int ghost_xCoord = xCoord;
+    private int ghost_yCoord = yCoord;
     private int rotation = 0;
     private int prevRotation;
     private Integer kicktableKey;
@@ -56,6 +61,11 @@ public class TetrisFrame extends JPanel implements Runnable{
     private HashMap<Integer, Long> keysHeldDuration = new HashMap<>();
 
     public int lines = 0;
+    public double pieces_placed = 0;
+    public double keys_pressed = 0;
+    public double keys_per_piece = 0.0;
+    public long ghost_timer = Long.MAX_VALUE; 
+    public boolean peek = false;
     
 
     public TetrisFrame() {
@@ -70,8 +80,29 @@ public class TetrisFrame extends JPanel implements Runnable{
         addToQueue();
 
         updateCurrentPiece(); 
+
     }
 
+
+    //RESET STUFF
+    private void reset() {
+        initBoard();
+
+        queue.clear();
+        addToQueue();
+
+        currentPiece = removeFirstPiece();
+        ghostPiece = currentPiece;
+
+        hold = null;
+
+        resetPieceStuff();
+
+        lines = 0;
+        pieces_placed = 0;
+        keys_per_piece = 0;
+        keys_pressed = 0;
+    }
 
     //BOARD CODE
     private void initBoard() {
@@ -103,11 +134,11 @@ public class TetrisFrame extends JPanel implements Runnable{
     private void removeLine(int line) {
         // Move every row above `line` one step down
         for (int r = line; r > 0; r--) {
-            System.arraycopy(board[r - 1], 0, board[r], 0, TetrisBoard.COLS);
+            System.arraycopy(board[r - 1], 0, board[r], 0, COLS);
         }
 
         // Clear the top row
-        for (int c = 0; c < TetrisBoard.COLS; c++) {
+        for (int c = 0; c < COLS; c++) {
             board[0][c] = 0;
         }
 
@@ -168,12 +199,38 @@ public class TetrisFrame extends JPanel implements Runnable{
 
         xCoord = 3;
         yCoord = 0;
+        ghost_xCoord = xCoord;
+        ghost_yCoord = yCoord;
         rotation = 0;
         prevRotation = 0;
     }
 
+    //ghost piece code, most of it was copyt pasted, refactor to make more efficient
+    //TODO: ^^^
+
+    public boolean changeGhostCoord(int xChange, int yChange) {
+        // System.out.println(System.currentTimeMillis());
+        ghost_xCoord += xChange;
+        ghost_yCoord += yChange;
+        if (isColliding(ghost_xCoord, ghost_yCoord)) {
+            ghost_xCoord -= xChange;
+            ghost_yCoord -= yChange;
+            return false;
+        }
+        return true;
+    }
+
+    public void insertGhostPiece() {
+        ghost_xCoord = xCoord;
+        ghost_yCoord = yCoord;
+                while(true) {
+            if(!changeGhostCoord(0, 1)) break;
+
+        }
+    }
     public void updateCurrentPiece() { // from queeuue right now
         currentPiece = removeFirstPiece();
+        ghostPiece = currentPiece;
     }
 
     public void rotatePiece(int rotate) {
@@ -193,25 +250,31 @@ public class TetrisFrame extends JPanel implements Runnable{
         prevRotation = tempPrevRot;
     }
 
+    public void softDrop() {
+        while(true) {
+            if(!changeCoord(0, 1)) break;
+
+        }
+    }
+
     public boolean changeCoord(int xChange, int yChange) {
         // System.out.println(System.currentTimeMillis());
         xCoord += xChange;
         yCoord += yChange;
-        if (isColliding()) {
+        if (isColliding(xCoord, yCoord)) {
             xCoord -= xChange;
             yCoord -= yChange;
             return false;
         }
         return true;
     }
-
-    private boolean isColliding() {
+    private boolean isColliding(int x, int y) {
         int[][] data = currentPiece.rotations[rotation];
 
         for (int i = 0; i < data.length; i++) {
             for (int j = 0; j < data.length; j++) {
                 // bounds collision detection
-                if (j + xCoord < 0) {
+                if (j + x < 0) {
 
                     if (data[i][j] != 0) {
                         // System.out.println("left: fck u");
@@ -223,7 +286,7 @@ public class TetrisFrame extends JPanel implements Runnable{
                     }
                 }
 
-                if (j + xCoord >= TetrisBoard.COLS) {
+                if (j + x >= COLS) {
                     if (data[i][j] != 0) {
                         // System.out.println("right: fck u");
                         return true;
@@ -234,7 +297,7 @@ public class TetrisFrame extends JPanel implements Runnable{
                     }
                 }
 
-                if (i + yCoord >= TetrisBoard.ROWS) {
+                if (i + y >= ROWS) {
                     if (data[i][j] != 0) {
                         // System.out.println("down:fck u");
                         return true;
@@ -245,7 +308,7 @@ public class TetrisFrame extends JPanel implements Runnable{
                     }
                 }
 
-                if (i + yCoord < 0) {
+                if (i + y < 0) {
                     if (data[i][j] != 0) {
                         // System.out.println("up:fck u");
                         return true;
@@ -258,8 +321,8 @@ public class TetrisFrame extends JPanel implements Runnable{
 
                 // block collision detection
                 if (data[i][j] != 0) {
-                    if (board[yCoord + i][xCoord + j] != 0) {
-                        // System.out.println("WEEEWOOOWOOOWOWOWWOWOWOWOWOWOW");
+                    if (board[y + i][x + j] != 0) {
+                        //System.out.println("WEEEWOOOWOOOWOWOWWOWOWOWOWOWOW");
                         return true;
                     }
                 }
@@ -277,12 +340,17 @@ public class TetrisFrame extends JPanel implements Runnable{
         else {
             TetrisPiece temp = currentPiece;
             currentPiece = hold;
+            ghostPiece = currentPiece;
             hold = temp;
         }
         
         resetPieceStuff();
     }
 
+    // public void insertGhostPiece() {
+    //     int[][] data = ghostPiece.rotations[rotation];
+    //     int 
+    // }
     public void insertPiece() {
         int[][] data = currentPiece.rotations[rotation];
 
@@ -298,6 +366,8 @@ public class TetrisFrame extends JPanel implements Runnable{
                 board[yCoord+i][xCoord+j] = data[i][j];
             }
         }
+
+    
 
 
         clearLines();
@@ -329,8 +399,11 @@ public class TetrisFrame extends JPanel implements Runnable{
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
 
-                g.setColor(colors[board[i][j]]);
-                g.fillRect(BOARD_XOFFSET + j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                if(ghost_timer == Long.MAX_VALUE) {
+                    g.setColor(colors[board[i][j]]);
+                    g.fillRect(BOARD_XOFFSET + j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+                }
 
                 g.setColor(Color.GRAY);
                 g.drawRect(BOARD_XOFFSET + j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -343,8 +416,15 @@ public class TetrisFrame extends JPanel implements Runnable{
 
         //TODO: draw shadow piece first
 
-        // draw current piece
         int[][] data = currentPiece.rotations[rotation];
+        for(int i = 0; i < data.length; i++) {
+            for(int j = 0; j < data[i].length; j++) {
+                if(data[i][j] == 0) continue;
+                g.setColor(Color.gray);
+                g.fillRect(BOARD_XOFFSET + (j + ghost_xCoord) * CELL_SIZE, (i+ ghost_yCoord) * CELL_SIZE, CELL_SIZE , CELL_SIZE);
+            }
+        }
+        // draw current piece
         for(int i = 0; i < data.length; i++) {
             for(int j = 0; j < data[i].length; j++) {
                 if(data[i][j] == 0) continue;
@@ -371,11 +451,15 @@ public class TetrisFrame extends JPanel implements Runnable{
             g.drawLine(BOARD_XOFFSET, (lines-20) *CELL_SIZE, BOARD_XOFFSET+ COLS*CELL_SIZE, (lines-20)*CELL_SIZE);
         } catch (Exception e) {
             // TODO: handle exception
+            //do nothing
         }
 
         //draw stats
         g.setColor(Color.WHITE);
         g.drawString("Lines cleared: " + lines, CELL_SIZE, 15*CELL_SIZE);
+        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE, 16*CELL_SIZE);
+        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE, 17*CELL_SIZE);
+        g.drawString("KPP: " + keys_per_piece, CELL_SIZE, 18*CELL_SIZE);
 
     }
 
@@ -385,8 +469,10 @@ public class TetrisFrame extends JPanel implements Runnable{
             @Override
             public void keyPressed(KeyEvent e) {
                 int code = e.getKeyCode();
+                //System.out.println(code);
                 boolean added = addUserInput(code);
                 if(added) {
+                    keys_pressed++;
                     switch (code) {
                         case 74: //left
                             changeCoord(-1, 0);
@@ -396,7 +482,7 @@ public class TetrisFrame extends JPanel implements Runnable{
                         case 85: //u
                             changeCoord(0, -1);break;
                         case 59: //d
-                            changeCoord(0, 1);break;
+                            softDrop();break;
                         case 65: //ccw
                             rotatePiece(1);break;
                         case 83: //cw
@@ -407,7 +493,17 @@ public class TetrisFrame extends JPanel implements Runnable{
                             holdPiece();break;
                         case 75: //hd
                             insertPiece();
-                            addToQueue();break;
+                            addToQueue();
+                            pieces_placed++;
+                            keys_per_piece = keys_pressed / pieces_placed;
+                            break;
+                        case 8: //backspace to reset
+                            reset();
+                            break;
+                        case 32: //ghost and is spacebar
+                            ghost_timer = System.nanoTime(); 
+                            peek = true;
+                            break;
                         default:
                             break;
                     }
@@ -424,9 +520,6 @@ public class TetrisFrame extends JPanel implements Runnable{
                 keysHeld.remove(Integer.valueOf(code));
                 keysHeldDuration.replace(Integer.valueOf(code), Long.MAX_VALUE);
 
-                if(code == 74 || code == 76) {
-                    System.out.println("trigfgere");
-                    DAS_timer = DAS;}
                 } catch (Exception E) {
                     
                 }
@@ -438,9 +531,6 @@ public class TetrisFrame extends JPanel implements Runnable{
         if(keysHeld.contains(key)) {
             return false;
         }
-        if(key == 74 || key == 76) {
-            System.out.println("big trig");
-            DAS_timer = DAS;}
         keysHeld.add(Integer.valueOf(key));
         keysHeldDuration.put(Integer.valueOf(key), System.nanoTime());
         return true;
@@ -458,46 +548,54 @@ public class TetrisFrame extends JPanel implements Runnable{
 
     @Override
     public void run() {
+        int i = 0;
         while(running) {
         try {
             Thread.sleep(sleep);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        update();
+        update(System.nanoTime());
         }
     }
 
-    private void update() {
+    private void update(long current_time) {
+        //this is stupid, fix it
+        insertGhostPiece();
+
+        if(peek) {
+            if((current_time - ghost_timer) / 1_000_000 >= 5000) {
+                ghost_timer = Long.MAX_VALUE;
+                peek = false;
+            }
+        }
+
+
+
         int ARR_DIRECTION = 0; //1  will make it go right, -1 make go left
+        int key = 0; //key for left/right direciton will be tm
         //long current_time = System.nanoTime();
         for(int i =  0; i < keysHeld.size(); i++) {
             if(keysHeld.get(i) == 74) {
                 ARR_DIRECTION = -1;
-                DAS_timer -= sleep;
+                key = keysHeld.get(i);
             }
             if(keysHeld.get(i) == 76) {
                 ARR_DIRECTION = 1;
-                DAS_timer -= sleep;
+                key = keysHeld.get(i);
             }
         }
-        if(DAS_timer <= 0) {
+        long time;
+        try {
+            time = keysHeldDuration.get(Integer.valueOf(key));
+        } catch (Exception e) {
+            time = -1;
+        }
+        if((current_time - time)/1_000_000 >= DAS) {
             if(ARR == 0) {
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
-                changeCoord(ARR_DIRECTION, 0);
+                while(true && ARR_DIRECTION != 0) {
+                    if(!changeCoord(ARR_DIRECTION, 0)) {break;}
+                }
 
             }
             if(ARR_timer <= 0) {
