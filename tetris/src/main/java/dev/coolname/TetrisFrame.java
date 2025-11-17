@@ -9,26 +9,26 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
-
 import javax.swing.JPanel;
 
-public class TetrisFrame extends JPanel implements Runnable{
+public class TetrisFrame extends JPanel implements Runnable {
 
     private Thread thread;
     private boolean running = false;
     public long sleep = 1;
-    public long last;
+    public long last_drawn = System.nanoTime();
+    public long frame = 10;
 
     public static final int ROWS = 20;
     public static final int COLS = 10;
     public static final int CELL_SIZE = 30;
 
-    public static int DAS = 80;
+    public static int DAS = 150;
     public static int ARR = 0;
     public int ARR_timer = ARR;
     public static int SDF = 0;
     public int SDF_timer = SDF;
-    //public static int DAS_DIRECTION = 0;
+    // public static int DAS_DIRECTION = 0;
 
     public static final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
             Color.YELLOW, Color.PINK };
@@ -44,11 +44,10 @@ public class TetrisFrame extends JPanel implements Runnable{
     public static final int QUEUE_DISPLAY_LENGTH = 5;
     public static final int QUEUE_XOFFSET = 16 * CELL_SIZE;
     private static final TetrisPiece[] all_pieces = TetrisPiece.values();
-    public static final int[] QUEUE_YOFFSET = {0, 3 * CELL_SIZE, 6 * CELL_SIZE, 9 * CELL_SIZE, 12 * CELL_SIZE };
+    public static final int[] QUEUE_YOFFSET = { 0, 3 * CELL_SIZE, 6 * CELL_SIZE, 9 * CELL_SIZE, 12 * CELL_SIZE };
     public ArrayList<TetrisPiece> queue = new ArrayList<>();
 
     private TetrisPiece currentPiece;
-    private TetrisPiece ghostPiece;
     private int xCoord = 3;
     private int yCoord = 0;
     private int ghost_xCoord = xCoord;
@@ -64,27 +63,96 @@ public class TetrisFrame extends JPanel implements Runnable{
     public double pieces_placed = 0;
     public double keys_pressed = 0;
     public double keys_per_piece = 0.0;
-    public long ghost_timer = Long.MAX_VALUE; 
+    public int finesse_faults = 0;
+    public long ghost_timer = Long.MAX_VALUE;
     public boolean peek = false;
+    public int current_keys_pressed = 0;
+
+    
+    HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
+
     
 
     public TetrisFrame() {
         initBoard();
+        setFinesseMap();
         addKeyListener();
         setFocusable(true);
         requestFocusInWindow();
+        
         addToQueue();
         addToQueue();
         addToQueue();
         addToQueue();
         addToQueue();
 
-        updateCurrentPiece(); 
+        updateCurrentPiece();
 
     }
 
+    //temp, set finesse table
+    public void setFinesseMap() {
+        finesseMap.put('T', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2},
+            {3, 4, 3, 2, 3, 4, 4, 3, 3}, //ccw idk if this is the right index but wtv
+            {3, 4, 3, 2, 3, 4, 4, 3}, //180
+            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 1)
+        });
 
-    //RESET STUFF
+
+        finesseMap.put('O', new Integer[][] {
+            {2, 3, 3, 2, 1, 2, 3, 3, 2}, //index all rotations by xCoord+1
+            {2, 3, 3, 2, 1, 2, 3, 3, 2},
+            {2, 3, 3, 2, 1, 2, 3, 3, 2},
+            {2, 3, 3, 2, 1, 2, 3, 3, 2},
+        });
+
+
+        
+        finesseMap.put('Z', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2}, //0
+            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //ccw
+            {2, 3, 2, 1, 2, 3, 3, 2},
+            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //cw (index by xCoord + 1))
+        });
+
+        finesseMap.put('S', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2}, //0
+            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //ccw
+            {2, 3, 2, 1, 2, 3, 3, 2},
+            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //cw (index by xCoord + 1))
+        });
+
+
+
+        finesseMap.put('L', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2}, //0
+            {3, 4, 3, 2, 3, 4, 4, 3, 3}, //ccw
+            {3, 4, 3, 2, 3, 4, 4, 3},
+            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 1))
+        });
+
+
+        
+        finesseMap.put('J', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2}, //0
+            {3, 4, 3, 2, 3, 4, 4, 3, 3}, //ccw
+            {3, 4, 3, 2, 3, 4, 4, 3},
+            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 1))
+        });
+
+
+
+        finesseMap.put('I', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 2}, //0
+            {3, 3, 3, 3, 2, 2, 3, 3, 3, 3}, //ccw (index by xCoord + 1)
+            {2, 3, 2, 1, 2, 3, 2},
+            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 2))
+        });
+    }
+
+
+    // RESET STUFF
     private void reset() {
         initBoard();
 
@@ -92,7 +160,6 @@ public class TetrisFrame extends JPanel implements Runnable{
         addToQueue();
 
         currentPiece = removeFirstPiece();
-        ghostPiece = currentPiece;
 
         hold = null;
 
@@ -102,9 +169,10 @@ public class TetrisFrame extends JPanel implements Runnable{
         pieces_placed = 0;
         keys_per_piece = 0;
         keys_pressed = 0;
+        finesse_faults = 0;
     }
 
-    //BOARD CODE
+    // BOARD CODE
     private void initBoard() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
@@ -113,8 +181,9 @@ public class TetrisFrame extends JPanel implements Runnable{
         }
 
     }
+
     private void clearLines() {
-                // Start from bottom row and go upward
+        // Start from bottom row and go upward
         for (int r = ROWS - 1; r >= 0; r--) {
             if (isLineFull(r)) {
                 removeLine(r);
@@ -125,11 +194,11 @@ public class TetrisFrame extends JPanel implements Runnable{
 
     private boolean isLineFull(int row) {
         for (int c = 0; c < COLS; c++) {
-            if (board[row][c] == 0) return false;
+            if (board[row][c] == 0)
+                return false;
         }
         return true;
     }
-
 
     private void removeLine(int line) {
         // Move every row above `line` one step down
@@ -145,29 +214,10 @@ public class TetrisFrame extends JPanel implements Runnable{
         lines++;
     }
 
-
-
-
-
-
-
-
-
-    //HOLD CODE
+    // HOLD CODE
     public void setHoldPiece(TetrisPiece piece) {
         hold = piece;
     }
-
-
-
-
-
-
-
-
-
-
-
 
     // QUEUE CODE
     public void addToQueue() {
@@ -203,10 +253,12 @@ public class TetrisFrame extends JPanel implements Runnable{
         ghost_yCoord = yCoord;
         rotation = 0;
         prevRotation = 0;
+        current_keys_pressed = 0;
     }
 
-    //ghost piece code, most of it was copyt pasted, refactor to make more efficient
-    //TODO: ^^^
+    // ghost piece code, most of it was copyt pasted, refactor to make more
+    // efficient
+    // TODO: ^^^
 
     public boolean changeGhostCoord(int xChange, int yChange) {
         // System.out.println(System.currentTimeMillis());
@@ -223,14 +275,15 @@ public class TetrisFrame extends JPanel implements Runnable{
     public void insertGhostPiece() {
         ghost_xCoord = xCoord;
         ghost_yCoord = yCoord;
-                while(true) {
-            if(!changeGhostCoord(0, 1)) break;
+        while (true) {
+            if (!changeGhostCoord(0, 1))
+                break;
 
         }
     }
+
     public void updateCurrentPiece() { // from queeuue right now
         currentPiece = removeFirstPiece();
-        ghostPiece = currentPiece;
     }
 
     public void rotatePiece(int rotate) {
@@ -251,8 +304,9 @@ public class TetrisFrame extends JPanel implements Runnable{
     }
 
     public void softDrop() {
-        while(true) {
-            if(!changeCoord(0, 1)) break;
+        while (true) {
+            if (!changeCoord(0, 1))
+                break;
 
         }
     }
@@ -268,6 +322,7 @@ public class TetrisFrame extends JPanel implements Runnable{
         }
         return true;
     }
+
     private boolean isColliding(int x, int y) {
         int[][] data = currentPiece.rotations[rotation];
 
@@ -322,7 +377,7 @@ public class TetrisFrame extends JPanel implements Runnable{
                 // block collision detection
                 if (data[i][j] != 0) {
                     if (board[y + i][x + j] != 0) {
-                        //System.out.println("WEEEWOOOWOOOWOWOWWOWOWOWOWOWOW");
+                        // System.out.println("WEEEWOOOWOOOWOWOWWOWOWOWOWOWOW");
                         return true;
                     }
                 }
@@ -332,48 +387,132 @@ public class TetrisFrame extends JPanel implements Runnable{
     }
 
     public void holdPiece() {
-        if(hold == null) {
+        if (hold == null) {
             System.out.println("no piece in hold");
             hold = currentPiece;
             updateCurrentPiece();
-        }
-        else {
+        } else {
             TetrisPiece temp = currentPiece;
             currentPiece = hold;
-            ghostPiece = currentPiece;
             hold = temp;
         }
-        
+
         resetPieceStuff();
     }
 
     // public void insertGhostPiece() {
-    //     int[][] data = ghostPiece.rotations[rotation];
-    //     int 
+    // int[][] data = ghostPiece.rotations[rotation];
+    // int
     // }
     public void insertPiece() {
         int[][] data = currentPiece.rotations[rotation];
 
-
-        while(true) {
-            if(!changeCoord(0, 1)) break;
+        while (true) {
+            if (!changeCoord(0, 1))
+                break;
 
         }
 
-        for(int i = 0; i < data.length; i++) {
-            for(int j = 0; j < data.length; j++) {
-                if(data[i][j] == 0) continue;
-                board[yCoord+i][xCoord+j] = data[i][j];
+        for (int i = 0; i < data.length; i++) {
+            for (int j = 0; j < data.length; j++) {
+                if (data[i][j] == 0)
+                    continue;
+                board[yCoord + i][xCoord + j] = data[i][j];
             }
         }
 
-    
+        System.out.println(xCoord);
 
+        //check finesse
+        checkFinesse();
 
         clearLines();
         resetPieceStuff();
         updateCurrentPiece();
 
+    }
+
+    public void checkFinesse() {
+        char pieceChar = currentPiece.charID;
+        Integer[][] pieceFinesseTable = finesseMap.get(pieceChar);
+        int bestMoves = 9;
+        switch (pieceChar) {
+            case 'O':
+                bestMoves = pieceFinesseTable[rotation][xCoord + 1];
+                break;
+
+
+
+            case 'T':
+                if(rotation == 3) {
+                    bestMoves = pieceFinesseTable[rotation][xCoord + 1];
+                }
+                else {
+                    bestMoves = pieceFinesseTable[rotation][xCoord];
+                }
+                break;
+
+
+
+            case 'L':
+                if(rotation == 3) {
+                    bestMoves = pieceFinesseTable[rotation][xCoord + 1];
+                }
+                else {
+                    bestMoves = pieceFinesseTable[rotation][xCoord];
+                }
+                break;
+
+
+            case 'J':
+                if(rotation == 3) {
+                    bestMoves = pieceFinesseTable[rotation][xCoord + 1];
+                }
+                else {
+                    bestMoves = pieceFinesseTable[rotation][xCoord];
+                }
+                break;
+
+
+            case 'S':
+                if(rotation == 3) {
+                    bestMoves = pieceFinesseTable[rotation][xCoord + 1];
+                }
+                else {
+                    bestMoves = pieceFinesseTable[rotation][xCoord];
+                }
+                break;
+
+
+
+            case 'Z':
+                if(rotation == 3) {
+                    bestMoves = pieceFinesseTable[rotation][xCoord + 1];
+                }
+                else {
+                    bestMoves = pieceFinesseTable[rotation][xCoord];
+                }
+                break;
+
+
+            case 'I':
+                if(rotation == 1) {
+                    bestMoves = pieceFinesseTable[rotation][xCoord + 1];
+                }
+                else if(rotation == 3){
+                    bestMoves = pieceFinesseTable[rotation][xCoord + 2];
+                }
+                else {
+                    bestMoves = pieceFinesseTable[rotation][xCoord];
+                }
+                break;
+            default:
+                break;
+        }
+        if(current_keys_pressed > bestMoves) {
+            finesse_faults += current_keys_pressed - bestMoves;
+
+        }
     }
 
     // DRAWING STUFF
@@ -384,7 +523,7 @@ public class TetrisFrame extends JPanel implements Runnable{
         super.paintComponent(g);
 
         // draw hold
-        if(hold != null) {
+        if (hold != null) {
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < hold.rotations[0].length; j++) {
                     g.setColor(colors[hold.rotations[0][i][j]]);
@@ -394,12 +533,11 @@ public class TetrisFrame extends JPanel implements Runnable{
 
         }
 
-
         // draw board
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
 
-                if(ghost_timer == Long.MAX_VALUE) {
+                if (ghost_timer == Long.MAX_VALUE) {
                     g.setColor(colors[board[i][j]]);
                     g.fillRect(BOARD_XOFFSET + j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
@@ -410,26 +548,29 @@ public class TetrisFrame extends JPanel implements Runnable{
 
             }
         }
-        
+
         // g.setColor(Color.GRAY);
         // g.drawRect(BOARD_XOFFSET, BOARD_YOFFSET, COLS*CELL_SIZE, ROWS*CELL_SIZE);
 
-        //TODO: draw shadow piece first
+        // TODO: draw shadow piece first
 
         int[][] data = currentPiece.rotations[rotation];
-        for(int i = 0; i < data.length; i++) {
-            for(int j = 0; j < data[i].length; j++) {
-                if(data[i][j] == 0) continue;
+        for (int i = 0; i < data.length; i++) {
+            for (int j = 0; j < data[i].length; j++) {
+                if (data[i][j] == 0)
+                    continue;
                 g.setColor(Color.gray);
-                g.fillRect(BOARD_XOFFSET + (j + ghost_xCoord) * CELL_SIZE, (i+ ghost_yCoord) * CELL_SIZE, CELL_SIZE , CELL_SIZE);
+                g.fillRect(BOARD_XOFFSET + (j + ghost_xCoord) * CELL_SIZE, (i + ghost_yCoord) * CELL_SIZE, CELL_SIZE,
+                        CELL_SIZE);
             }
         }
         // draw current piece
-        for(int i = 0; i < data.length; i++) {
-            for(int j = 0; j < data[i].length; j++) {
-                if(data[i][j] == 0) continue;
+        for (int i = 0; i < data.length; i++) {
+            for (int j = 0; j < data[i].length; j++) {
+                if (data[i][j] == 0)
+                    continue;
                 g.setColor(colors[data[i][j]]);
-                g.fillRect(BOARD_XOFFSET + (j + xCoord) * CELL_SIZE, (i+ yCoord) * CELL_SIZE, CELL_SIZE , CELL_SIZE);
+                g.fillRect(BOARD_XOFFSET + (j + xCoord) * CELL_SIZE, (i + yCoord) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             }
         }
 
@@ -448,18 +589,20 @@ public class TetrisFrame extends JPanel implements Runnable{
 
         try {
             g.setColor(Color.LIGHT_GRAY);
-            g.drawLine(BOARD_XOFFSET, (lines-20) *CELL_SIZE, BOARD_XOFFSET+ COLS*CELL_SIZE, (lines-20)*CELL_SIZE);
+            g.drawLine(BOARD_XOFFSET, (lines - 20) * CELL_SIZE, BOARD_XOFFSET + COLS * CELL_SIZE,
+                    (lines - 20) * CELL_SIZE);
         } catch (Exception e) {
             // TODO: handle exception
-            //do nothing
+            // do nothing
         }
 
-        //draw stats
+        // draw stats
         g.setColor(Color.WHITE);
-        g.drawString("Lines cleared: " + lines, CELL_SIZE, 15*CELL_SIZE);
-        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE, 16*CELL_SIZE);
-        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE, 17*CELL_SIZE);
-        g.drawString("KPP: " + keys_per_piece, CELL_SIZE, 18*CELL_SIZE);
+        g.drawString("Lines cleared: " + lines, CELL_SIZE, 15 * CELL_SIZE);
+        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE, 16 * CELL_SIZE);
+        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE, 17 * CELL_SIZE);
+        g.drawString("KPP: " + keys_per_piece, CELL_SIZE, 18 * CELL_SIZE);
+        g.drawString("Finesse: " + finesse_faults, CELL_SIZE, 19 * CELL_SIZE);
 
     }
 
@@ -469,39 +612,47 @@ public class TetrisFrame extends JPanel implements Runnable{
             @Override
             public void keyPressed(KeyEvent e) {
                 int code = e.getKeyCode();
-                //System.out.println(code);
+                // System.out.println(code);
                 boolean added = addUserInput(code);
-                if(added) {
+                if (added) {
                     keys_pressed++;
+                    current_keys_pressed++;
                     switch (code) {
-                        case 74: //left
+                        case 74: // left
                             changeCoord(-1, 0);
                             break;
-                        case 76: //r
-                            changeCoord(1, 0);break;
-                        case 85: //u
-                            changeCoord(0, -1);break;
-                        case 59: //d
-                            softDrop();break;
-                        case 65: //ccw
-                            rotatePiece(1);break;
-                        case 83: //cw
-                            rotatePiece(3);break;
-                        case 16: //180
-                            rotatePiece(2);break;
-                        case 68: //hold
-                            holdPiece();break;
-                        case 75: //hd
+                        case 76: // r
+                            changeCoord(1, 0);
+                            break;
+                        case 85: // u
+                            changeCoord(0, -1);
+                            break;
+                        case 59: // d
+                            softDrop();
+                            break;
+                        case 65: // ccw
+                            rotatePiece(1);
+                            break;
+                        case 83: // cw
+                            rotatePiece(3);
+                            break;
+                        case 16: // 180
+                            rotatePiece(2);
+                            break;
+                        case 68: // hold
+                            holdPiece();
+                            break;
+                        case 75: // hd
                             insertPiece();
                             addToQueue();
                             pieces_placed++;
                             keys_per_piece = keys_pressed / pieces_placed;
                             break;
-                        case 8: //backspace to reset
+                        case 8: // backspace to reset
                             reset();
                             break;
-                        case 32: //ghost and is spacebar
-                            ghost_timer = System.nanoTime(); 
+                        case 32: // ghost and is spacebar
+                            ghost_timer = System.nanoTime();
                             peek = true;
                             break;
                         default:
@@ -509,78 +660,74 @@ public class TetrisFrame extends JPanel implements Runnable{
                     }
                 }
 
-
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
                 try {
-                    
-                int code = e.getKeyCode();
-                keysHeld.remove(Integer.valueOf(code));
-                keysHeldDuration.replace(Integer.valueOf(code), Long.MAX_VALUE);
+
+                    int code = e.getKeyCode();
+                    keysHeld.remove(Integer.valueOf(code));
+                    keysHeldDuration.replace(Integer.valueOf(code), Long.MAX_VALUE);
 
                 } catch (Exception E) {
-                    
+
                 }
             }
         });
     }
 
     public boolean addUserInput(int key) {
-        if(keysHeld.contains(key)) {
+        if (keysHeld.contains(key)) {
             return false;
         }
         keysHeld.add(Integer.valueOf(key));
         keysHeldDuration.put(Integer.valueOf(key), System.nanoTime());
         return true;
     }
-    
 
-    //RUNNING CODE
+    // RUNNING CODE
     public void start() {
-        if(running) return;
+        if (running)
+            return;
         running = true;
         thread = new Thread(this);
         thread.start();
     }
 
-
     @Override
     public void run() {
         int i = 0;
-        while(running) {
-        try {
-            Thread.sleep(sleep);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        update(System.nanoTime());
+        while (running) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            update(System.nanoTime());
         }
     }
 
     private void update(long current_time) {
-        //this is stupid, fix it
+        // this is stupid, fix it
         insertGhostPiece();
 
-        if(peek) {
-            if((current_time - ghost_timer) / 1_000_000 >= 5000) {
+        if (peek) {
+            if ((current_time - ghost_timer) / 1_000_000 >= 5000) {
                 ghost_timer = Long.MAX_VALUE;
                 peek = false;
             }
         }
 
-
-
-        int ARR_DIRECTION = 0; //1  will make it go right, -1 make go left
-        int key = 0; //key for left/right direciton will be tm
-        //long current_time = System.nanoTime();
-        for(int i =  0; i < keysHeld.size(); i++) {
-            if(keysHeld.get(i) == 74) {
+        int ARR_DIRECTION = 0; // 1 will make it go right, -1 make go left
+        int key = 0; // key for left/right direciton will be tm
+        // long current_time = System.nanoTime();
+        for (int i = 0; i < keysHeld.size(); i++) {
+            if (keysHeld.get(i) == 74) {
                 ARR_DIRECTION = -1;
                 key = keysHeld.get(i);
             }
-            if(keysHeld.get(i) == 76) {
+            if (keysHeld.get(i) == 76) {
                 ARR_DIRECTION = 1;
                 key = keysHeld.get(i);
             }
@@ -591,22 +738,26 @@ public class TetrisFrame extends JPanel implements Runnable{
         } catch (Exception e) {
             time = -1;
         }
-        if((current_time - time)/1_000_000 >= DAS) {
-            if(ARR == 0) {
-                while(true && ARR_DIRECTION != 0) {
-                    if(!changeCoord(ARR_DIRECTION, 0)) {break;}
+        if ((current_time - time) / 1_000_000 >= DAS) {
+            if (ARR == 0) {
+                while (true && ARR_DIRECTION != 0) {
+                    if (!changeCoord(ARR_DIRECTION, 0)) {
+                        break;
+                    }
                 }
 
             }
-            if(ARR_timer <= 0) {
+            if (ARR_timer <= 0) {
                 changeCoord(ARR_DIRECTION, 0);
                 ARR_timer = ARR;
-            }
-            else {
+            } else {
                 ARR_timer -= sleep;
             }
         }
-        repaint();
+        if ((current_time - last_drawn) / 1_000_000 >= frame) {
+            repaint();
+            last_drawn = current_time;
+        }
     }
 
 }

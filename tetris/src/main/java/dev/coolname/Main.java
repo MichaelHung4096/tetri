@@ -1,21 +1,23 @@
 package dev.coolname;
 
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.HashMap;
 
 import javax.swing.JFrame;
+
 public class Main {
     private static JFrame frame;
 
     private static void init() {
         frame.setDefaultCloseOperation(
-            JFrame.EXIT_ON_CLOSE);
-            
+                JFrame.EXIT_ON_CLOSE);
+
         frame.pack();
         frame.setVisible(true);
     }
+
     public static void main(String[] args) {
         frame = new JFrame("My First JFrame");
         frame.setLayout(new FlowLayout());
@@ -31,33 +33,68 @@ public class Main {
 
         pan.start();
 
+        //TODO: finesse
+        //have a 2d array of finesse vals for each piece. first index is rotation. second index is array of possible finesses for a given x-coord. in the case wehre there are less than 4 unqieu states for that piece (ie I,S,Z), mod rotation  by number of unique states. trust me this just works ok cvool 
+
+
+        HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
+        finesseMap.put('T', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2},
+            {3, 4, 3, 2, 3, 4, 4, 3, 3}, //ccw idk if this is the right index but wtv
+            {3, 4, 3, 2, 3, 4, 4, 3}, //180
+            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 1)
+        });
+
+
+        finesseMap.put('O', new Integer[][] {
+            {2, 3, 3, 2, 1, 2, 3, 3, 2}, //index all rotations by xCoord+1
+            {2, 3, 3, 2, 1, 2, 3, 3, 2},
+            {2, 3, 3, 2, 1, 2, 3, 3, 2},
+            {2, 3, 3, 2, 1, 2, 3, 3, 2},
+        });
+
 
         
-        // TetrisBoard board = new TetrisBoard(TetrisBoard.CELL_SIZE, TetrisBoard.CELL_SIZE);
-        // TetrisCurrentPiece currentPiece = new TetrisCurrentPiece();
-        // TetrisHold hold = new TetrisHold();
-        // TetrisQueue queue = new TetrisQueue(TetrisBoard.CELL_SIZE, TetrisBoard.CELL_SIZE);
+        finesseMap.put('Z', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2}, //0
+            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //ccw
+            {2, 3, 2, 1, 2, 3, 3, 2},
+            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //cw (index by xCoord + 1))
+        });
+
+        finesseMap.put('S', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2}, //0
+            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //ccw  
+            {2, 3, 2, 1, 2, 3, 3, 2},
+            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //cw (index by xCoord + 1))
+        });
 
 
 
+        finesseMap.put('L', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2}, //0
+            {3, 4, 3, 2, 3, 4, 4, 3, 3}, //ccw
+            {3, 4, 3, 2, 3, 4, 4, 3},
+            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 1))
+        });
 
-        // board.setCurrentPieceRef(currentPiece);
-        // board.setQueueReference(queue);
-        // board.setHoldReference(hold);
 
-        // currentPiece.setBoardReference(board);
-        // currentPiece.setQueueReference(queue);
-        // currentPiece.setHoldReference(hold);
         
-        // currentPiece.updateCurrentPiece();
+        finesseMap.put('J', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 3, 2}, //0
+            {3, 4, 3, 2, 3, 4, 4, 3, 3}, //ccw
+            {3, 4, 3, 2, 3, 4, 4, 3},
+            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 1))
+        });
 
-        // board.start();
-        
-        // queue.syncQueue();
-        // frame.add(hold);
-        // frame.add(board);
-        // frame.add(queue);
 
+
+        finesseMap.put('I', new Integer[][] {
+            {2, 3, 2, 1, 2, 3, 2}, //0
+            {3, 3, 3, 3, 2, 2, 3, 3, 3, 3}, //ccw (index by xCoord + 1)
+            {2, 3, 2, 1, 2, 3, 2},
+            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 2))
+        });
 
 
 
