@@ -29,6 +29,8 @@ public class TetrisFrame extends JPanel implements Runnable {
     public static int SDF = 0;
     public int SDF_timer = SDF;
     // public static int DAS_DIRECTION = 0;
+    public static int gravity = 10000;
+    public long gravity_timer;
 
     public static final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
             Color.YELLOW, Color.PINK };
@@ -67,6 +69,10 @@ public class TetrisFrame extends JPanel implements Runnable {
     public long ghost_timer = Long.MAX_VALUE;
     public boolean peek = false;
     public int current_keys_pressed = 0;
+    public double time = 0;
+    public long start;
+
+    //TODO: make data to show how long a piece was on the ground without being harddropped, do this per piece and average of all pieces
 
     
     HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
@@ -74,6 +80,10 @@ public class TetrisFrame extends JPanel implements Runnable {
     
 
     public TetrisFrame() {
+        gravity_timer = System.nanoTime();
+
+
+
         initBoard();
         setFinesseMap();
         addKeyListener();
@@ -147,7 +157,7 @@ public class TetrisFrame extends JPanel implements Runnable {
             {2, 3, 2, 1, 2, 3, 2}, //0
             {3, 3, 3, 3, 2, 2, 3, 3, 3, 3}, //ccw (index by xCoord + 1)
             {2, 3, 2, 1, 2, 3, 2},
-            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 2))
+            {3, 3, 3, 3, 2, 2, 3, 3, 3, 3}, //cw (index by xCoord + 2))
         });
     }
 
@@ -170,6 +180,9 @@ public class TetrisFrame extends JPanel implements Runnable {
         keys_per_piece = 0;
         keys_pressed = 0;
         finesse_faults = 0;
+
+        start = 0;
+        time = 0;
     }
 
     // BOARD CODE
@@ -254,6 +267,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         rotation = 0;
         prevRotation = 0;
         current_keys_pressed = 0;
+        gravity_timer = System.nanoTime();
     }
 
     // ghost piece code, most of it was copyt pasted, refactor to make more
@@ -552,7 +566,6 @@ public class TetrisFrame extends JPanel implements Runnable {
         // g.setColor(Color.GRAY);
         // g.drawRect(BOARD_XOFFSET, BOARD_YOFFSET, COLS*CELL_SIZE, ROWS*CELL_SIZE);
 
-        // TODO: draw shadow piece first
 
         int[][] data = currentPiece.rotations[rotation];
         for (int i = 0; i < data.length; i++) {
@@ -592,17 +605,17 @@ public class TetrisFrame extends JPanel implements Runnable {
             g.drawLine(BOARD_XOFFSET, (lines - 20) * CELL_SIZE, BOARD_XOFFSET + COLS * CELL_SIZE,
                     (lines - 20) * CELL_SIZE);
         } catch (Exception e) {
-            // TODO: handle exception
             // do nothing
         }
 
         // draw stats
         g.setColor(Color.WHITE);
-        g.drawString("Lines cleared: " + lines, CELL_SIZE, 15 * CELL_SIZE);
-        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE, 16 * CELL_SIZE);
-        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE, 17 * CELL_SIZE);
-        g.drawString("KPP: " + keys_per_piece, CELL_SIZE, 18 * CELL_SIZE);
-        g.drawString("Finesse: " + finesse_faults, CELL_SIZE, 19 * CELL_SIZE);
+        g.drawString("Lines cleared: " + lines, CELL_SIZE, 10 * CELL_SIZE);
+        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE, 11 * CELL_SIZE);
+        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE, 12 * CELL_SIZE);
+        g.drawString("KPP: " + keys_per_piece, CELL_SIZE, 13 * CELL_SIZE);
+        g.drawString("Finesse: " + finesse_faults, CELL_SIZE, 14 * CELL_SIZE);
+        g.drawString("TIme : " + time, CELL_SIZE, 15 * CELL_SIZE);
 
     }
 
@@ -617,6 +630,9 @@ public class TetrisFrame extends JPanel implements Runnable {
                 if (added) {
                     keys_pressed++;
                     current_keys_pressed++;
+                    if(start == 0) {
+                        start = System.nanoTime();
+                    }
                     switch (code) {
                         case 74: // left
                             changeCoord(-1, 0);
@@ -719,6 +735,10 @@ public class TetrisFrame extends JPanel implements Runnable {
             }
         }
 
+
+
+
+
         int ARR_DIRECTION = 0; // 1 will make it go right, -1 make go left
         int key = 0; // key for left/right direciton will be tm
         // long current_time = System.nanoTime();
@@ -754,6 +774,19 @@ public class TetrisFrame extends JPanel implements Runnable {
                 ARR_timer -= sleep;
             }
         }
+
+
+        if((current_time - gravity_timer) / 1_000_000 >= gravity) {
+            changeCoord(0, 1);
+            gravity_timer = current_time;
+        }
+
+
+
+
+
+        this.time = ((current_time - start) / 1_000_000) / 1000.0;
+
         if ((current_time - last_drawn) / 1_000_000 >= frame) {
             repaint();
             last_drawn = current_time;

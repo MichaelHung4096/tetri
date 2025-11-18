@@ -33,10 +33,6 @@ public class Main {
 
         pan.start();
 
-        //TODO: finesse
-        //have a 2d array of finesse vals for each piece. first index is rotation. second index is array of possible finesses for a given x-coord. in the case wehre there are less than 4 unqieu states for that piece (ie I,S,Z), mod rotation  by number of unique states. trust me this just works ok cvool 
-
-
         HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
         finesseMap.put('T', new Integer[][] {
             {2, 3, 2, 1, 2, 3, 3, 2},
