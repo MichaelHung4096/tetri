@@ -19,7 +19,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        frame = new JFrame("My First JFrame");
+        frame = new JFrame("haha biggie bock ride");
         frame.setLayout(new FlowLayout());
 
 

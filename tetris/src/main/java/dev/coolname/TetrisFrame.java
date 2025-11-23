@@ -15,21 +15,21 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     private Thread thread;
     private boolean running = false;
-    public long sleep = 1;
+    public long sleep = 10;
     public long last_drawn = System.nanoTime();
-    public long frame = 10;
+    public long frame = 1;
 
     public static final int ROWS = 20;
     public static final int COLS = 10;
     public static final int CELL_SIZE = 30;
 
-    public static int DAS = 150;
+    public static int DAS = 80;
     public static int ARR = 0;
     public int ARR_timer = ARR;
     public static int SDF = 0;
     public int SDF_timer = SDF;
     // public static int DAS_DIRECTION = 0;
-    public static int gravity = 10000;
+    public static int gravity = 1000;
     public long gravity_timer;
 
     public static final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
@@ -74,6 +74,10 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     //TODO: make data to show how long a piece was on the ground without being harddropped, do this per piece and average of all pieces
 
+    public boolean on_ground = false;
+    public long time_since_ground = 0;
+    public long total_time_on_ground = 0;
+    public double average_time_on_ground = 0;
     
     HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
 
@@ -97,6 +101,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         addToQueue();
 
         updateCurrentPiece();
+        insertGhostPiece();
 
     }
 
@@ -183,6 +188,11 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         start = 0;
         time = 0;
+
+        on_ground = false;
+        time_since_ground = 0;
+        total_time_on_ground = 0;
+        average_time_on_ground = 0;
     }
 
     // BOARD CODE
@@ -261,7 +271,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     private void resetPieceStuff() {
 
         xCoord = 3;
-        yCoord = 0;
+        yCoord = -1;
         ghost_xCoord = xCoord;
         ghost_yCoord = yCoord;
         rotation = 0;
@@ -431,7 +441,12 @@ public class TetrisFrame extends JPanel implements Runnable {
             for (int j = 0; j < data.length; j++) {
                 if (data[i][j] == 0)
                     continue;
-                board[yCoord + i][xCoord + j] = data[i][j];
+                try {
+                    
+                    board[yCoord + i][xCoord + j] = data[i][j];
+                } catch (Exception e) {
+                    // TODO: handle exception
+                }
             }
         }
 
@@ -439,6 +454,8 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         //check finesse
         checkFinesse();
+
+
 
         clearLines();
         resetPieceStuff();
@@ -616,6 +633,8 @@ public class TetrisFrame extends JPanel implements Runnable {
         g.drawString("KPP: " + keys_per_piece, CELL_SIZE, 13 * CELL_SIZE);
         g.drawString("Finesse: " + finesse_faults, CELL_SIZE, 14 * CELL_SIZE);
         g.drawString("TIme : " + time, CELL_SIZE, 15 * CELL_SIZE);
+        g.drawString("total ground : " + average_time_on_ground * pieces_placed, CELL_SIZE, 16 * CELL_SIZE);
+        g.drawString("avg ground : " + average_time_on_ground, CELL_SIZE, 17 * CELL_SIZE);
 
     }
 
@@ -628,41 +647,68 @@ public class TetrisFrame extends JPanel implements Runnable {
                 // System.out.println(code);
                 boolean added = addUserInput(code);
                 if (added) {
-                    keys_pressed++;
-                    current_keys_pressed++;
                     if(start == 0) {
                         start = System.nanoTime();
                     }
                     switch (code) {
-                        case 74: // left
+                         case 74: // left
+                            keys_pressed++;
+                            current_keys_pressed++;
                             changeCoord(-1, 0);
+                            insertGhostPiece();
                             break;
-                        case 76: // r
+                         case 76: // r
+                            keys_pressed++;
+                            current_keys_pressed++;
                             changeCoord(1, 0);
+                            insertGhostPiece();
                             break;
-                        case 85: // u
+                         case 85: // u
+                            keys_pressed++;
+                            current_keys_pressed++;
                             changeCoord(0, -1);
+                            insertGhostPiece();
                             break;
                         case 59: // d
+                            keys_pressed++;
+                            current_keys_pressed++;
                             softDrop();
+                            insertGhostPiece();
                             break;
                         case 65: // ccw
+                            keys_pressed++;
+                            current_keys_pressed++;
                             rotatePiece(1);
+                            insertGhostPiece();
                             break;
                         case 83: // cw
+                            keys_pressed++;
+                            current_keys_pressed++;
                             rotatePiece(3);
+                            insertGhostPiece();
                             break;
                         case 16: // 180
+                            keys_pressed++;
+                            current_keys_pressed++;
                             rotatePiece(2);
+                            insertGhostPiece();
                             break;
                         case 68: // hold
+                            keys_pressed++;
+                            current_keys_pressed++;
                             holdPiece();
+                            insertGhostPiece();
                             break;
                         case 75: // hd
+                            keys_pressed++;
+                            current_keys_pressed++;
                             insertPiece();
                             addToQueue();
+                            average_time_on_ground = ((average_time_on_ground * pieces_placed) + (total_time_on_ground)) /(pieces_placed + 1);
                             pieces_placed++;
+                            total_time_on_ground = 0;
                             keys_per_piece = keys_pressed / pieces_placed;
+                            insertGhostPiece();
                             break;
                         case 8: // backspace to reset
                             reset();
@@ -673,6 +719,7 @@ public class TetrisFrame extends JPanel implements Runnable {
                             break;
                         default:
                             break;
+                            
                     }
                 }
 
@@ -725,13 +772,27 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     private void update(long current_time) {
-        // this is stupid, fix it
-        insertGhostPiece();
 
         if (peek) {
             if ((current_time - ghost_timer) / 1_000_000 >= 5000) {
                 ghost_timer = Long.MAX_VALUE;
                 peek = false;
+            }
+        }
+
+
+
+
+        if(ghost_yCoord == yCoord) {
+            if(!on_ground) {
+                on_ground = true;
+                time_since_ground = current_time;
+            }
+        }
+        else {
+            if(on_ground) {
+                on_ground = false;
+                total_time_on_ground += ((current_time - time_since_ground) / 1_000_000);
             }
         }
 
@@ -765,6 +826,7 @@ public class TetrisFrame extends JPanel implements Runnable {
                         break;
                     }
                 }
+                insertGhostPiece();
 
             }
             if (ARR_timer <= 0) {
@@ -777,7 +839,12 @@ public class TetrisFrame extends JPanel implements Runnable {
 
 
         if((current_time - gravity_timer) / 1_000_000 >= gravity) {
-            changeCoord(0, 1);
+            if(ghost_yCoord > yCoord) {
+                changeCoord(0, 1);
+            }
+            if(yCoord > ghost_yCoord) {
+                yCoord = ghost_yCoord;
+            }
             gravity_timer = current_time;
         }
 
