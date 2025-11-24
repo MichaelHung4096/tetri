@@ -37,7 +37,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     public static final int BOARD_XOFFSET = 5 * CELL_SIZE;
     public static final int BOARD_YOFFSET = 0;
-    private int board[][] = new int[ROWS][COLS];
+    private int board[][] = new int[ROWS*2][COLS];
 
     public static final int HOLD_XOFFSET = 0;
     public static final int HOLD_YOFFSET = 0;
@@ -51,7 +51,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     private TetrisPiece currentPiece;
     private int xCoord = 3;
-    private int yCoord = 0;
+    private int yCoord = ROWS - 1;
     private int ghost_xCoord = xCoord;
     private int ghost_yCoord = yCoord;
     private int rotation = 0;
@@ -71,6 +71,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     public int current_keys_pressed = 0;
     public double time = 0;
     public long start;
+    public double final_time = 0;
 
     //TODO: make data to show how long a piece was on the ground without being harddropped, do this per piece and average of all pieces
 
@@ -193,11 +194,12 @@ public class TetrisFrame extends JPanel implements Runnable {
         time_since_ground = 0;
         total_time_on_ground = 0;
         average_time_on_ground = 0;
+        final_time = 0;
     }
 
     // BOARD CODE
     private void initBoard() {
-        for (int i = 0; i < ROWS; i++) {
+        for (int i = 0; i < 2*ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 board[i][j] = 0;
             }
@@ -207,7 +209,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     private void clearLines() {
         // Start from bottom row and go upward
-        for (int r = ROWS - 1; r >= 0; r--) {
+        for (int r = 2*ROWS - 1; r >= 0; r--) {
             if (isLineFull(r)) {
                 removeLine(r);
                 r++; // Recheck the same row index (since rows above moved down)
@@ -271,7 +273,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     private void resetPieceStuff() {
 
         xCoord = 3;
-        yCoord = -1;
+        yCoord = ROWS - 1;
         ghost_xCoord = xCoord;
         ghost_yCoord = yCoord;
         rotation = 0;
@@ -376,7 +378,7 @@ public class TetrisFrame extends JPanel implements Runnable {
                     }
                 }
 
-                if (i + y >= ROWS) {
+                if (i + y >= 2*ROWS) {
                     if (data[i][j] != 0) {
                         // System.out.println("down:fck u");
                         return true;
@@ -450,14 +452,22 @@ public class TetrisFrame extends JPanel implements Runnable {
             }
         }
 
-        System.out.println(xCoord);
-
+        System.out.println(yCoord);
         //check finesse
         checkFinesse();
 
 
 
         clearLines();
+
+        if(lines >= 40 && final_time == 0) {
+            System.out.println("doneeodne");
+            final_time = time;
+            System.out.println(final_time);
+        }
+
+
+
         resetPieceStuff();
         updateCurrentPiece();
 
@@ -569,7 +579,7 @@ public class TetrisFrame extends JPanel implements Runnable {
             for (int j = 0; j < COLS; j++) {
 
                 if (ghost_timer == Long.MAX_VALUE) {
-                    g.setColor(colors[board[i][j]]);
+                    g.setColor(colors[board[i+ROWS][j]]);
                     g.fillRect(BOARD_XOFFSET + j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
                 }
@@ -590,7 +600,7 @@ public class TetrisFrame extends JPanel implements Runnable {
                 if (data[i][j] == 0)
                     continue;
                 g.setColor(Color.gray);
-                g.fillRect(BOARD_XOFFSET + (j + ghost_xCoord) * CELL_SIZE, (i + ghost_yCoord) * CELL_SIZE, CELL_SIZE,
+                g.fillRect(BOARD_XOFFSET + (j + ghost_xCoord) * CELL_SIZE, (i + ghost_yCoord - ROWS) * CELL_SIZE, CELL_SIZE,
                         CELL_SIZE);
             }
         }
@@ -599,8 +609,13 @@ public class TetrisFrame extends JPanel implements Runnable {
             for (int j = 0; j < data[i].length; j++) {
                 if (data[i][j] == 0)
                     continue;
-                g.setColor(colors[data[i][j]]);
-                g.fillRect(BOARD_XOFFSET + (j + xCoord) * CELL_SIZE, (i + yCoord) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    try {
+                        
+                        g.setColor(colors[data[i][j]]);
+                        g.fillRect(BOARD_XOFFSET + (j + xCoord) * CELL_SIZE, (i + yCoord - ROWS) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    } catch (Exception e) {
+                        // TODO: handle exception
+                    }
             }
         }
 
@@ -635,6 +650,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         g.drawString("TIme : " + time, CELL_SIZE, 15 * CELL_SIZE);
         g.drawString("total ground : " + average_time_on_ground * pieces_placed, CELL_SIZE, 16 * CELL_SIZE);
         g.drawString("avg ground : " + average_time_on_ground, CELL_SIZE, 17 * CELL_SIZE);
+        g.drawString("40L times: " + final_time, CELL_SIZE, 18 * CELL_SIZE);
 
     }
 
