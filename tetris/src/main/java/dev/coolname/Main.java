@@ -3,6 +3,8 @@ package dev.coolname;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
@@ -15,7 +17,8 @@ public class Main {
                 JFrame.EXIT_ON_CLOSE);
 
         frame.pack();
-        frame.setVisible(true);
+        frame.setVisible(true);frame.setFocusable(true);
+frame.requestFocusInWindow();
     }
 
     public static void main(String[] args) {
@@ -31,7 +34,40 @@ public class Main {
         pan.setBackground(Color.BLACK);
         frame.add(pan);
 
+        // TetrisFrame p2 = new TetrisFrame();
+        // p2.setPreferredSize(d);
+        // p2.setBackground(Color.BLACK);
+        // frame.add(p2);
+
+        
+        // TetrisFrame p3 = new TetrisFrame();
+        // p3.setPreferredSize(d);
+        // p3.setBackground(Color.BLACK);
+        // frame.add(p3);
+
+
+                frame.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int code = e.getKeyCode();
+                pan.key_handle(code);
+                // p2.key_handle(code);
+                // p3.key_handle(code);
+
+            }   
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                pan.key_released(e);
+                // p2.key_released(e);
+                // p3.key_released(e);
+
+            }
+        });
+
         pan.start();
+        // p2.start();
+        // p3.start();
 
         // TetrisFrame peter = new TetrisFrame();
         // peter.setPreferredSize(d);
@@ -43,10 +79,11 @@ public class Main {
 
 
 
-
-
-
-
         init();
+
+
+
+
+
     }
 }

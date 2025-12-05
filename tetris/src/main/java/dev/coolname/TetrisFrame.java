@@ -13,6 +13,9 @@ import javax.swing.JPanel;
 
 public class TetrisFrame extends JPanel implements Runnable {
 
+    // just one more variable bro trust me we just need one more variabel and itll
+    // fix everything just trust me bro
+
     private Thread thread;
     private boolean running = false;
     public long sleep = 10;
@@ -29,7 +32,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     public static int SDF = 0;
     public int SDF_timer = SDF;
     // public static int DAS_DIRECTION = 0;
-    public static int gravity = 1000;
+    public static int gravity = 1000000;
     public long gravity_timer;
 
     public static final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
@@ -37,7 +40,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     public static final int BOARD_XOFFSET = 5 * CELL_SIZE;
     public static final int BOARD_YOFFSET = 0;
-    private int board[][] = new int[ROWS*2][COLS];
+    private int board[][] = new int[ROWS * 2][COLS];
 
     public static final int HOLD_XOFFSET = 0;
     public static final int HOLD_YOFFSET = 0;
@@ -46,7 +49,10 @@ public class TetrisFrame extends JPanel implements Runnable {
     public static final int QUEUE_DISPLAY_LENGTH = 5;
     public static final int QUEUE_XOFFSET = 16 * CELL_SIZE;
     private static final TetrisPiece[] all_pieces = TetrisPiece.values();
-    public static final int[] QUEUE_YOFFSET = { 0, 3 * CELL_SIZE, 6 * CELL_SIZE, 9 * CELL_SIZE, 12 * CELL_SIZE };
+    public static final int[] QUEUE_YOFFSET = { 0, 3 * CELL_SIZE, 6 * CELL_SIZE, 9 * CELL_SIZE, 12 * CELL_SIZE }; // TODO:
+                                                                                                                  // do
+                                                                                                                  // this
+                                                                                                                  // dynamically
     public ArrayList<TetrisPiece> queue = new ArrayList<>();
 
     private TetrisPiece currentPiece;
@@ -72,29 +78,29 @@ public class TetrisFrame extends JPanel implements Runnable {
     public double time = 0;
     public long start;
     public double final_time = 0;
-
-    //TODO: make data to show how long a piece was on the ground without being harddropped, do this per piece and average of all pieces
+    public double pieces_per_second = 0;
+    public double keys_per_second = 0;
 
     public boolean on_ground = false;
     public long time_since_ground = 0;
     public long total_time_on_ground = 0;
     public double average_time_on_ground = 0;
-    
-    HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
 
-    
+    public double[] kpm_keys = new double[COLS];
+    public double[] kpm_minos = new double[COLS];
+    public boolean[] kpm_detected = new boolean[COLS];
+
+    HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
 
     public TetrisFrame() {
         gravity_timer = System.nanoTime();
 
-
-
         initBoard();
         setFinesseMap();
-        addKeyListener();
-        setFocusable(true);
-        requestFocusInWindow();
-        
+        //addKeyListener();
+        //setFocusable(true);
+        //requestFocusInWindow();
+
         addToQueue();
         addToQueue();
         addToQueue();
@@ -104,69 +110,64 @@ public class TetrisFrame extends JPanel implements Runnable {
         updateCurrentPiece();
         insertGhostPiece();
 
+        
+        for(int i =0; i < COLS; i++) {
+            kpm_detected[i] = false;
+        }
+
     }
 
-    //temp, set finesse table
+    // temp, set finesse table
     public void setFinesseMap() {
         finesseMap.put('T', new Integer[][] {
-            {2, 3, 2, 1, 2, 3, 3, 2},
-            {3, 4, 3, 2, 3, 4, 4, 3, 3}, //ccw idk if this is the right index but wtv
-            {3, 4, 3, 2, 3, 4, 4, 3}, //180
-            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 1)
+                { 2, 3, 2, 1, 2, 3, 3, 2 },
+                { 3, 4, 3, 2, 3, 4, 4, 3, 3 }, // ccw idk if this is the right index but wtv
+                { 3, 4, 3, 2, 3, 4, 4, 3 }, // 180
+                { 3, 3, 4, 3, 2, 3, 4, 4, 3 }, // cw (index by xCoord + 1)
         });
-
 
         finesseMap.put('O', new Integer[][] {
-            {2, 3, 3, 2, 1, 2, 3, 3, 2}, //index all rotations by xCoord+1
-            {2, 3, 3, 2, 1, 2, 3, 3, 2},
-            {2, 3, 3, 2, 1, 2, 3, 3, 2},
-            {2, 3, 3, 2, 1, 2, 3, 3, 2},
+                { 2, 3, 3, 2, 1, 2, 3, 3, 2 }, // index all rotations by xCoord+1
+                { 2, 3, 3, 2, 1, 2, 3, 3, 2 },
+                { 2, 3, 3, 2, 1, 2, 3, 3, 2 },
+                { 2, 3, 3, 2, 1, 2, 3, 3, 2 },
         });
 
-
-        
         finesseMap.put('Z', new Integer[][] {
-            {2, 3, 2, 1, 2, 3, 3, 2}, //0
-            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //ccw
-            {2, 3, 2, 1, 2, 3, 3, 2},
-            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //cw (index by xCoord + 1))
+                { 2, 3, 2, 1, 2, 3, 3, 2 }, // 0
+                { 3, 3, 3, 2, 2, 3, 4, 3, 3 }, // ccw
+                { 2, 3, 2, 1, 2, 3, 3, 2 },
+                { 3, 3, 3, 2, 2, 3, 4, 3, 3 }, // cw (index by xCoord + 1))
         });
 
         finesseMap.put('S', new Integer[][] {
-            {2, 3, 2, 1, 2, 3, 3, 2}, //0
-            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //ccw
-            {2, 3, 2, 1, 2, 3, 3, 2},
-            {3, 3, 3, 2, 2, 3, 4, 3, 3}, //cw (index by xCoord + 1))
+                { 2, 3, 2, 1, 2, 3, 3, 2 }, // 0
+                { 3, 3, 3, 2, 2, 3, 4, 3, 3 }, // ccw
+                { 2, 3, 2, 1, 2, 3, 3, 2 },
+                { 3, 3, 3, 2, 2, 3, 4, 3, 3 }, // cw (index by xCoord + 1))
         });
-
-
 
         finesseMap.put('L', new Integer[][] {
-            {2, 3, 2, 1, 2, 3, 3, 2}, //0
-            {3, 4, 3, 2, 3, 4, 4, 3, 3}, //ccw
-            {3, 4, 3, 2, 3, 4, 4, 3},
-            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 1))
+                { 2, 3, 2, 1, 2, 3, 3, 2 }, // 0
+                { 3, 4, 3, 2, 3, 4, 4, 3, 3 }, // ccw
+                { 3, 4, 3, 2, 3, 4, 4, 3 },
+                { 3, 3, 4, 3, 2, 3, 4, 4, 3 }, // cw (index by xCoord + 1))
         });
 
-
-        
         finesseMap.put('J', new Integer[][] {
-            {2, 3, 2, 1, 2, 3, 3, 2}, //0
-            {3, 4, 3, 2, 3, 4, 4, 3, 3}, //ccw
-            {3, 4, 3, 2, 3, 4, 4, 3},
-            {3, 3, 4, 3, 2, 3, 4, 4, 3}, //cw (index by xCoord + 1))
+                { 2, 3, 2, 1, 2, 3, 3, 2 }, // 0
+                { 3, 4, 3, 2, 3, 4, 4, 3, 3 }, // ccw
+                { 3, 4, 3, 2, 3, 4, 4, 3 },
+                { 3, 3, 4, 3, 2, 3, 4, 4, 3 }, // cw (index by xCoord + 1))
         });
-
-
 
         finesseMap.put('I', new Integer[][] {
-            {2, 3, 2, 1, 2, 3, 2}, //0
-            {3, 3, 3, 3, 2, 2, 3, 3, 3, 3}, //ccw (index by xCoord + 1)
-            {2, 3, 2, 1, 2, 3, 2},
-            {3, 3, 3, 3, 2, 2, 3, 3, 3, 3}, //cw (index by xCoord + 2))
+                { 2, 3, 2, 1, 2, 3, 2 }, // 0
+                { 3, 3, 3, 3, 2, 2, 3, 3, 3, 3 }, // ccw (index by xCoord + 1)
+                { 2, 3, 2, 1, 2, 3, 2 },
+                { 3, 3, 3, 3, 2, 2, 3, 3, 3, 3 }, // cw (index by xCoord + 2))
         });
     }
-
 
     // RESET STUFF
     private void reset() {
@@ -195,11 +196,18 @@ public class TetrisFrame extends JPanel implements Runnable {
         total_time_on_ground = 0;
         average_time_on_ground = 0;
         final_time = 0;
+
+
+        for(int i = 0; i < COLS; i++) {
+            kpm_keys[i] = 0;
+            kpm_minos[i] = 0;
+            kpm_detected[i] = false;
+        }
     }
 
     // BOARD CODE
     private void initBoard() {
-        for (int i = 0; i < 2*ROWS; i++) {
+        for (int i = 0; i < 2 * ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 board[i][j] = 0;
             }
@@ -208,11 +216,10 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     private void clearLines() {
-        // Start from bottom row and go upward
-        for (int r = 2*ROWS - 1; r >= 0; r--) {
+        for (int r = 2 * ROWS - 1; r >= 0; r--) {
             if (isLineFull(r)) {
                 removeLine(r);
-                r++; // Recheck the same row index (since rows above moved down)
+                r++;
             }
         }
     }
@@ -226,12 +233,10 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     private void removeLine(int line) {
-        // Move every row above `line` one step down
         for (int r = line; r > 0; r--) {
             System.arraycopy(board[r - 1], 0, board[r], 0, COLS);
         }
 
-        // Clear the top row
         for (int c = 0; c < COLS; c++) {
             board[0][c] = 0;
         }
@@ -302,7 +307,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         ghost_xCoord = xCoord;
         ghost_yCoord = yCoord;
         while (true) {
-            if (!changeGhostCoord(0, 1))
+            if (!changeGhostCoord(0, 1)) // this cannot be good practice holy
                 break;
 
         }
@@ -378,7 +383,7 @@ public class TetrisFrame extends JPanel implements Runnable {
                     }
                 }
 
-                if (i + y >= 2*ROWS) {
+                if (i + y >= 2 * ROWS) {
                     if (data[i][j] != 0) {
                         // System.out.println("down:fck u");
                         return true;
@@ -444,29 +449,34 @@ public class TetrisFrame extends JPanel implements Runnable {
                 if (data[i][j] == 0)
                     continue;
                 try {
-                    
+
                     board[yCoord + i][xCoord + j] = data[i][j];
+
+
+                    if(kpm_detected[xCoord + j] == false) {
+                        kpm_detected[xCoord + j] = true;
+                        
+                    kpm_minos[xCoord + j] += 1;
+                        kpm_keys[xCoord + j] += current_keys_pressed;
+                    }
                 } catch (Exception e) {
                     // TODO: handle exception
                 }
             }
         }
+        for(int i =0; i < COLS; i++) {
+            kpm_detected[i] = false;
+        }
 
-        System.out.println(yCoord);
-        //check finesse
         checkFinesse();
-
-
 
         clearLines();
 
-        if(lines >= 40 && final_time == 0) {
-            System.out.println("doneeodne");
+        if (lines >= 40 && final_time == 0) {
             final_time = time;
-            System.out.println(final_time);
+            System.out.println(pieces_per_second);
+            System.out.println(keys_per_second);
         }
-
-
 
         resetPieceStuff();
         updateCurrentPiece();
@@ -482,75 +492,59 @@ public class TetrisFrame extends JPanel implements Runnable {
                 bestMoves = pieceFinesseTable[rotation][xCoord + 1];
                 break;
 
-
-
             case 'T':
-                if(rotation == 3) {
+                if (rotation == 3) {
                     bestMoves = pieceFinesseTable[rotation][xCoord + 1];
-                }
-                else {
+                } else {
                     bestMoves = pieceFinesseTable[rotation][xCoord];
                 }
                 break;
-
-
 
             case 'L':
-                if(rotation == 3) {
+                if (rotation == 3) {
                     bestMoves = pieceFinesseTable[rotation][xCoord + 1];
-                }
-                else {
+                } else {
                     bestMoves = pieceFinesseTable[rotation][xCoord];
                 }
                 break;
-
 
             case 'J':
-                if(rotation == 3) {
+                if (rotation == 3) {
                     bestMoves = pieceFinesseTable[rotation][xCoord + 1];
-                }
-                else {
+                } else {
                     bestMoves = pieceFinesseTable[rotation][xCoord];
                 }
                 break;
-
 
             case 'S':
-                if(rotation == 3) {
+                if (rotation == 3) {
                     bestMoves = pieceFinesseTable[rotation][xCoord + 1];
-                }
-                else {
+                } else {
                     bestMoves = pieceFinesseTable[rotation][xCoord];
                 }
                 break;
-
-
 
             case 'Z':
-                if(rotation == 3) {
+                if (rotation == 3) {
                     bestMoves = pieceFinesseTable[rotation][xCoord + 1];
-                }
-                else {
+                } else {
                     bestMoves = pieceFinesseTable[rotation][xCoord];
                 }
                 break;
 
-
             case 'I':
-                if(rotation == 1) {
+                if (rotation == 1) {
                     bestMoves = pieceFinesseTable[rotation][xCoord + 1];
-                }
-                else if(rotation == 3){
+                } else if (rotation == 3) {
                     bestMoves = pieceFinesseTable[rotation][xCoord + 2];
-                }
-                else {
+                } else {
                     bestMoves = pieceFinesseTable[rotation][xCoord];
                 }
                 break;
             default:
                 break;
         }
-        if(current_keys_pressed > bestMoves) {
+        if (current_keys_pressed > bestMoves) {
             finesse_faults += current_keys_pressed - bestMoves;
 
         }
@@ -579,7 +573,7 @@ public class TetrisFrame extends JPanel implements Runnable {
             for (int j = 0; j < COLS; j++) {
 
                 if (ghost_timer == Long.MAX_VALUE) {
-                    g.setColor(colors[board[i+ROWS][j]]);
+                    g.setColor(colors[board[i + ROWS][j]]);
                     g.fillRect(BOARD_XOFFSET + j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
                 }
@@ -593,14 +587,14 @@ public class TetrisFrame extends JPanel implements Runnable {
         // g.setColor(Color.GRAY);
         // g.drawRect(BOARD_XOFFSET, BOARD_YOFFSET, COLS*CELL_SIZE, ROWS*CELL_SIZE);
 
-
         int[][] data = currentPiece.rotations[rotation];
         for (int i = 0; i < data.length; i++) {
             for (int j = 0; j < data[i].length; j++) {
                 if (data[i][j] == 0)
                     continue;
                 g.setColor(Color.gray);
-                g.fillRect(BOARD_XOFFSET + (j + ghost_xCoord) * CELL_SIZE, (i + ghost_yCoord - ROWS) * CELL_SIZE, CELL_SIZE,
+                g.fillRect(BOARD_XOFFSET + (j + ghost_xCoord) * CELL_SIZE, (i + ghost_yCoord - ROWS) * CELL_SIZE,
+                        CELL_SIZE,
                         CELL_SIZE);
             }
         }
@@ -609,13 +603,14 @@ public class TetrisFrame extends JPanel implements Runnable {
             for (int j = 0; j < data[i].length; j++) {
                 if (data[i][j] == 0)
                     continue;
-                    try {
-                        
-                        g.setColor(colors[data[i][j]]);
-                        g.fillRect(BOARD_XOFFSET + (j + xCoord) * CELL_SIZE, (i + yCoord - ROWS) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    } catch (Exception e) {
-                        // TODO: handle exception
-                    }
+                try {
+
+                    g.setColor(colors[data[i][j]]);
+                    g.fillRect(BOARD_XOFFSET + (j + xCoord) * CELL_SIZE, (i + yCoord - ROWS) * CELL_SIZE, CELL_SIZE,
+                            CELL_SIZE);
+                } catch (Exception e) {
+                    // TODO: handle exception
+                }
             }
         }
 
@@ -642,108 +637,107 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         // draw stats
         g.setColor(Color.WHITE);
-        g.drawString("Lines cleared: " + lines, CELL_SIZE, 10 * CELL_SIZE);
-        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE, 11 * CELL_SIZE);
-        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE, 12 * CELL_SIZE);
-        g.drawString("KPP: " + keys_per_piece, CELL_SIZE, 13 * CELL_SIZE);
-        g.drawString("Finesse: " + finesse_faults, CELL_SIZE, 14 * CELL_SIZE);
-        g.drawString("TIme : " + time, CELL_SIZE, 15 * CELL_SIZE);
-        g.drawString("total ground : " + average_time_on_ground * pieces_placed, CELL_SIZE, 16 * CELL_SIZE);
-        g.drawString("avg ground : " + average_time_on_ground, CELL_SIZE, 17 * CELL_SIZE);
-        g.drawString("40L times: " + final_time, CELL_SIZE, 18 * CELL_SIZE);
+        //TODO: this could probably just be all one drawString use \n
+        g.drawString("Lines cleared: " + lines, CELL_SIZE, 6 * CELL_SIZE);
+        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE, 7 * CELL_SIZE);
+        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE, 8 * CELL_SIZE);
+        g.drawString("KPP: " + keys_per_piece, CELL_SIZE, 9 * CELL_SIZE);
+        g.drawString("Finesse: " + finesse_faults, CELL_SIZE, 10 * CELL_SIZE);
+        g.drawString("TIme : " + time, CELL_SIZE, 11 * CELL_SIZE);
+        g.drawString("total ground : " + average_time_on_ground * pieces_placed, CELL_SIZE, 12 * CELL_SIZE);
+        g.drawString("avg ground : " + average_time_on_ground, CELL_SIZE, 13 * CELL_SIZE);
+        g.drawString("PPS: " + pieces_per_second, CELL_SIZE, 14*CELL_SIZE);
+        g.drawString("KPS: " + keys_per_second, CELL_SIZE, 15*CELL_SIZE);
+        g.drawString("40L times: " + final_time, CELL_SIZE, 16 * CELL_SIZE);
 
     }
 
-    // KEY LISTENER
-    private void addKeyListener() {
-        this.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                int code = e.getKeyCode();
-                // System.out.println(code);
-                boolean added = addUserInput(code);
-                if (added) {
-                    if(start == 0) {
-                        start = System.nanoTime();
-                    }
-                    switch (code) {
-                         case 74: // left
+    private void move_left() {
+
                             keys_pressed++;
                             current_keys_pressed++;
                             changeCoord(-1, 0);
                             insertGhostPiece();
-                            break;
-                         case 76: // r
+    }
+
+    private void move_right() {
+        
                             keys_pressed++;
                             current_keys_pressed++;
                             changeCoord(1, 0);
                             insertGhostPiece();
-                            break;
-                         case 85: // u
+    }
+
+    private void move_up() {
+        
                             keys_pressed++;
                             current_keys_pressed++;
                             changeCoord(0, -1);
                             insertGhostPiece();
-                            break;
-                        case 59: // d
+    }
+
+    private void soft_drop() {
+        
                             keys_pressed++;
                             current_keys_pressed++;
-                            softDrop();
+                            softDrop(); //yea bro lets just have two mehtods named soft drop im so good at naming stuff
                             insertGhostPiece();
-                            break;
-                        case 65: // ccw
+    }
+
+    private void rotate_ccw() {
+        
                             keys_pressed++;
                             current_keys_pressed++;
                             rotatePiece(1);
                             insertGhostPiece();
-                            break;
-                        case 83: // cw
+    }
+
+    private void rotate_cw() {
+        
                             keys_pressed++;
                             current_keys_pressed++;
                             rotatePiece(3);
                             insertGhostPiece();
-                            break;
-                        case 16: // 180
+    }
+
+    private void rotate_180() {
+        
                             keys_pressed++;
                             current_keys_pressed++;
                             rotatePiece(2);
                             insertGhostPiece();
-                            break;
-                        case 68: // hold
+    }
+
+    private void hold() {
+        
                             keys_pressed++;
                             current_keys_pressed++;
                             holdPiece();
                             insertGhostPiece();
-                            break;
-                        case 75: // hd
+    }
+
+    private void hard_drop() {
+        
                             keys_pressed++;
                             current_keys_pressed++;
                             insertPiece();
                             addToQueue();
-                            average_time_on_ground = ((average_time_on_ground * pieces_placed) + (total_time_on_ground)) /(pieces_placed + 1);
+                            average_time_on_ground = ((average_time_on_ground * pieces_placed) + (total_time_on_ground))
+                                    / (pieces_placed + 1);
                             pieces_placed++;
                             total_time_on_ground = 0;
                             keys_per_piece = keys_pressed / pieces_placed;
                             insertGhostPiece();
-                            break;
-                        case 8: // backspace to reset
-                            reset();
-                            break;
-                        case 32: // ghost and is spacebar
+    }
+
+    private void ghost() {
+        
                             ghost_timer = System.nanoTime();
                             peek = true;
-                            break;
-                        default:
-                            break;
-                            
-                    }
-                }
+    }
 
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                try {
+    public void key_released(KeyEvent e) {
+                        try {
 
                     int code = e.getKeyCode();
                     keysHeld.remove(Integer.valueOf(code));
@@ -752,9 +746,119 @@ public class TetrisFrame extends JPanel implements Runnable {
                 } catch (Exception E) {
 
                 }
-            }
-        });
     }
+
+    public void key_handle(int code) {
+
+                boolean added = addUserInput(code);
+                if (added) {
+                    if (start == 0) {
+                        start = System.nanoTime();
+                    }
+                    switch (code) {
+                        case 74: // left
+                            
+                            move_left();
+                            break;
+                        case 76: // r
+                            move_right();
+                            break;
+                        case 85: // u
+                            move_up();
+                            break;
+                        case 59: // d
+                            soft_drop();
+                            break;
+                        case 65: // ccw
+                            rotate_ccw();
+                            break;
+                        case 83: // cw
+                            rotate_cw();
+                            break;
+                        case 16: // 180
+                            rotate_180();
+                            break;
+                        case 68: // hold
+                            hold();
+                            break;
+                        case 75: // hd
+                            hard_drop();
+                            break;
+                        case 8: // backspace to reset
+                            reset();
+                            break;
+                        case 32: // ghost and is spacebar
+                            ghost();
+                            break;
+                        default:
+                            break;
+
+                    }
+                    
+                    
+                }
+    }
+    // // KEY LISTENER
+    // private void addKeyListener() {
+    //     this.addKeyListener(new KeyAdapter() {
+    //         @Override
+    //         public void keyPressed(KeyEvent e) {
+    //             int code = e.getKeyCode();
+    //             // System.out.println(code);
+    //             boolean added = addUserInput(code);
+    //             if (added) {
+    //                 if (start == 0) {
+    //                     start = System.nanoTime();
+    //                 }
+    //                 switch (code) {
+    //                     case 74: // left
+    //                         move_left();
+    //                         break;
+    //                     case 76: // r
+    //                         move_right();
+    //                         break;
+    //                     case 85: // u
+    //                         move_up();
+    //                         break;
+    //                     case 59: // d
+    //                         soft_drop();
+    //                         break;
+    //                     case 65: // ccw
+    //                         rotate_ccw();
+    //                         break;
+    //                     case 83: // cw
+    //                         rotate_cw();
+    //                         break;
+    //                     case 16: // 180
+    //                         rotate_180();
+    //                         break;
+    //                     case 68: // hold
+    //                         hold();
+    //                         break;
+    //                     case 75: // hd
+    //                         hard_drop();
+    //                         break;
+    //                     case 8: // backspace to reset
+    //                         reset();
+    //                         break;
+    //                     case 32: // ghost and is spacebar
+    //                         ghost();
+    //                         break;
+    //                     default:
+    //                         break;
+
+    //                 }
+    //             }
+
+    //         }
+
+    //         @Override
+    //         public void keyReleased(KeyEvent e) {
+    //             key_released(e);
+
+    //         }
+    //     });
+    // }
 
     public boolean addUserInput(int key) {
         if (keysHeld.contains(key)) {
@@ -788,6 +892,8 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     private void update(long current_time) {
+        keys_per_second = keys_pressed / time;
+        pieces_per_second = pieces_placed / time;
 
         if (peek) {
             if ((current_time - ghost_timer) / 1_000_000 >= 5000) {
@@ -796,25 +902,17 @@ public class TetrisFrame extends JPanel implements Runnable {
             }
         }
 
-
-
-
-        if(ghost_yCoord == yCoord) {
-            if(!on_ground) {
+        if (ghost_yCoord == yCoord) {
+            if (!on_ground) {
                 on_ground = true;
                 time_since_ground = current_time;
             }
-        }
-        else {
-            if(on_ground) {
+        } else {
+            if (on_ground) {
                 on_ground = false;
                 total_time_on_ground += ((current_time - time_since_ground) / 1_000_000);
             }
         }
-
-
-
-
 
         int ARR_DIRECTION = 0; // 1 will make it go right, -1 make go left
         int key = 0; // key for left/right direciton will be tm
@@ -845,6 +943,7 @@ public class TetrisFrame extends JPanel implements Runnable {
                 insertGhostPiece();
 
             }
+            // pretty sure this is wrong for when arr not 0 but we ball
             if (ARR_timer <= 0) {
                 changeCoord(ARR_DIRECTION, 0);
                 ARR_timer = ARR;
@@ -853,20 +952,15 @@ public class TetrisFrame extends JPanel implements Runnable {
             }
         }
 
-
-        if((current_time - gravity_timer) / 1_000_000 >= gravity) {
-            if(ghost_yCoord > yCoord) {
+        if ((current_time - gravity_timer) / 1_000_000 >= gravity) {
+            if (ghost_yCoord > yCoord) {
                 changeCoord(0, 1);
             }
-            if(yCoord > ghost_yCoord) {
+            if (yCoord > ghost_yCoord) {
                 yCoord = ghost_yCoord;
             }
             gravity_timer = current_time;
         }
-
-
-
-
 
         this.time = ((current_time - start) / 1_000_000) / 1000.0;
 
