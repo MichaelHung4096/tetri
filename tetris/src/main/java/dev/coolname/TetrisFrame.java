@@ -101,6 +101,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         //setFocusable(true);
         //requestFocusInWindow();
 
+
         addToQueue();
         addToQueue();
         addToQueue();
@@ -638,6 +639,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         // draw stats
         g.setColor(Color.WHITE);
         //TODO: this could probably just be all one drawString use \n
+        //^^oh would also probably be rlly good for truncating doubles
         g.drawString("Lines cleared: " + lines, CELL_SIZE, 6 * CELL_SIZE);
         g.drawString("piescs placed: " + pieces_placed, CELL_SIZE, 7 * CELL_SIZE);
         g.drawString("keys pressed: " + keys_pressed, CELL_SIZE, 8 * CELL_SIZE);

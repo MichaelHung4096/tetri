@@ -41,50 +41,50 @@ frame.requestFocusInWindow();
 
 
 
-        // frame = new JFrame("haha biggie bock ride");
-        // frame.setLayout(new FlowLayout());
+        frame = new JFrame("haha biggie bock ride");
+        frame.setLayout(new FlowLayout());
 
 
 
-        // TetrisFrame pan = new TetrisFrame();
-        // //pan.setVisible(true);
-        // Dimension d = new Dimension((TetrisFrame.COLS + 10) * TetrisFrame.CELL_SIZE, TetrisFrame.ROWS * TetrisFrame.CELL_SIZE);
-        // pan.setPreferredSize(d);
-        // pan.setBackground(Color.BLACK);
-        // frame.add(pan);
+        TetrisFrame pan = new TetrisFrame();
+        //pan.setVisible(true);
+        Dimension d = new Dimension((TetrisFrame.COLS + 10) * TetrisFrame.CELL_SIZE, TetrisFrame.ROWS * TetrisFrame.CELL_SIZE);
+        pan.setPreferredSize(d);
+        pan.setBackground(Color.BLACK);
+        frame.add(pan);
 
-        // // TetrisFrame p2 = new TetrisFrame();
-        // // p2.setPreferredSize(d);
-        // // p2.setBackground(Color.BLACK);
-        // // frame.add(p2);
+        // TetrisFrame p2 = new TetrisFrame();
+        // p2.setPreferredSize(d);
+        // p2.setBackground(Color.BLACK);
+        // frame.add(p2);
 
         
-        // // TetrisFrame p3 = new TetrisFrame();
-        // // p3.setPreferredSize(d);
-        // // p3.setBackground(Color.BLACK);
-        // // frame.add(p3);
+        // TetrisFrame p3 = new TetrisFrame();
+        // p3.setPreferredSize(d);
+        // p3.setBackground(Color.BLACK);
+        // frame.add(p3);
 
 
-        //         frame.addKeyListener(new KeyAdapter() {
-        //     @Override
-        //     public void keyPressed(KeyEvent e) {
-        //         int code = e.getKeyCode();
-        //         pan.key_handle(code);
-        //         // p2.key_handle(code);
-        //         // p3.key_handle(code);
+                frame.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int code = e.getKeyCode();
+                pan.key_handle(code);
+                // p2.key_handle(code);
+                // p3.key_handle(code);
 
-        //     }   
+            }   
 
-        //     @Override
-        //     public void keyReleased(KeyEvent e) {
-        //         pan.key_released(e);
-        //         // p2.key_released(e);
-        //         // p3.key_released(e);
+            @Override
+            public void keyReleased(KeyEvent e) {
+                pan.key_released(e);
+                // p2.key_released(e);
+                // p3.key_released(e);
 
-        //     }
-        // });
+            }
+        });
 
-        // pan.start();
+        pan.start();
         // // p2.start();
         // // p3.start();
 
@@ -98,7 +98,7 @@ frame.requestFocusInWindow();
 
 
 
-        // init();
+        init();
 
 
 

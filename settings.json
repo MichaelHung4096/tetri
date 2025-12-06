@@ -1,5 +1,29 @@
 {
     "DAS" : 80,
-    "TEST" : 0,
-    "LEFTKEYS" : [55]
+    "ARR" : 0,
+    "SDF" : 41,
+    "IRS" : true,
+    "IHS" : true,
+
+    "GRAVITY" : 1000,
+    "QUEUE_DISPLAY_LENGTH" : 5,
+    "GROUND_UNTIL_LOCK" : 15000,
+
+
+    "MOVE_LEFT" : [74],
+    "MOVE_RIGHT" : [76],
+    "SOFT_DROP" : [59],
+    "HARD_DROP" : [75],
+    "ROTATE_CW" : [83],
+    "ROTATE_CCW" : [65],
+    "ROTATE_180" : [16],
+    "HOLD" : [68],
+
+    "RESET" : [8],
+    "TOGGLE_GHOST" : false,
+    "PEEK_DURATION" : 1000,
+    "GHOST_ACTION" : [32],
+    "GAME_INSTANCES" : 1
+
+
 } 
