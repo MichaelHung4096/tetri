@@ -28,7 +28,8 @@ public class TetrisSettings{
 
 
 
-    public TetrisSettings() {}
+    public TetrisSettings() {
+    }
 
 
 }
