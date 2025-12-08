@@ -10,7 +10,7 @@
     "GROUND_UNTIL_LOCK" : 15000,
 
 
-    "MOVE_LEFT" : [74],
+    "MOVE_LEFT" : [74, 73],
     "MOVE_RIGHT" : [76],
     "SOFT_DROP" : [59],
     "HARD_DROP" : [75],

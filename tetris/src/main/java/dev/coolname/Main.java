@@ -24,16 +24,13 @@ frame.requestFocusInWindow();
     }
 
     public static void main(String[] args) {
-        System.out.println("sdfsdf");
 
         ObjectMapper obj = new ObjectMapper();
+        TetrisSettings settings = null;
         try {
             
-        TetrisSettings test = obj.readValue(new File("settings.json"), TetrisSettings.class);
-        System.out.println("f");
-        System.out.println(test);
+        settings = obj.readValue(new File("settings.json"), TetrisSettings.class);
         } catch (Exception e) {
-            // TODO: handle exception
             System.out.println(e);
         }
 
@@ -46,12 +43,16 @@ frame.requestFocusInWindow();
 
 
 
-        TetrisFrame pan = new TetrisFrame();
+        TetrisFrame pan = new TetrisFrame(settings);
         //pan.setVisible(true);
         Dimension d = new Dimension((TetrisFrame.COLS + 10) * TetrisFrame.CELL_SIZE, TetrisFrame.ROWS * TetrisFrame.CELL_SIZE);
         pan.setPreferredSize(d);
         pan.setBackground(Color.BLACK);
         frame.add(pan);
+
+
+        TetrisSettingsFrame settingsMenu = new TetrisSettingsFrame(settings);
+        // frame.add(settingsMenu);
 
         // TetrisFrame p2 = new TetrisFrame();
         // p2.setPreferredSize(d);

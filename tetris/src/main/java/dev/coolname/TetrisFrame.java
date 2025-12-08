@@ -26,30 +26,30 @@ public class TetrisFrame extends JPanel implements Runnable {
     public static final int COLS = 10;
     public static final int CELL_SIZE = 30;
 
-    public static int DAS = 80;
-    public static int ARR = 0;
+    public  int DAS = 80;
+    public  int ARR = 0;
     public int ARR_timer = ARR;
-    public static int SDF = 0;
+    public  int SDF = 0;
     public int SDF_timer = SDF;
-    // public static int DAS_DIRECTION = 0;
-    public static int gravity = 1000000;
+    // public  int DAS_DIRECTION = 0;
+    public  int gravity = 1000000;
     public long gravity_timer;
 
-    public static final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
+    public  final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
             Color.YELLOW, Color.PINK };
 
-    public static final int BOARD_XOFFSET = 5 * CELL_SIZE;
-    public static final int BOARD_YOFFSET = 0;
+    public  final int BOARD_XOFFSET = 5 * CELL_SIZE;
+    public  final int BOARD_YOFFSET = 0;
     private int board[][] = new int[ROWS * 2][COLS];
 
-    public static final int HOLD_XOFFSET = 0;
-    public static final int HOLD_YOFFSET = 0;
+    public  final int HOLD_XOFFSET = 0;
+    public  final int HOLD_YOFFSET = 0;
     private TetrisPiece hold;
 
-    public static final int QUEUE_DISPLAY_LENGTH = 5;
-    public static final int QUEUE_XOFFSET = 16 * CELL_SIZE;
-    private static final TetrisPiece[] all_pieces = TetrisPiece.values();
-    public static final int[] QUEUE_YOFFSET = { 0, 3 * CELL_SIZE, 6 * CELL_SIZE, 9 * CELL_SIZE, 12 * CELL_SIZE }; // TODO:
+    public  final int QUEUE_DISPLAY_LENGTH = 5;
+    public  final int QUEUE_XOFFSET = 16 * CELL_SIZE;
+    private  final TetrisPiece[] all_pieces = TetrisPiece.values();
+    public  final int[] QUEUE_YOFFSET = { 0, 3 * CELL_SIZE, 6 * CELL_SIZE, 9 * CELL_SIZE, 12 * CELL_SIZE }; // TODO:
                                                                                                                   // do
                                                                                                                   // this
                                                                                                                   // dynamically
@@ -67,6 +67,8 @@ public class TetrisFrame extends JPanel implements Runnable {
     private ArrayList<Integer> keysHeld = new ArrayList<>();
     private HashMap<Integer, Long> keysHeldDuration = new HashMap<>();
 
+
+    //ohh maybe i use like a hashmap named stats that would make alot more sense huh 
     public int lines = 0;
     public double pieces_placed = 0;
     public double keys_pressed = 0;
@@ -92,7 +94,10 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
 
-    public TetrisFrame() {
+    TetrisSettings settings;
+
+    public TetrisFrame(TetrisSettings settings) {
+        this.settings = settings;
         gravity_timer = System.nanoTime();
 
         initBoard();
@@ -118,7 +123,9 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     }
 
-    // temp, set finesse table
+    //SET STUFF
+
+    //yooooo lets just have an enum for all the data of each piece and then not use it lets gooooo
     public void setFinesseMap() {
         finesseMap.put('T', new Integer[][] {
                 { 2, 3, 2, 1, 2, 3, 3, 2 },
@@ -750,6 +757,14 @@ public class TetrisFrame extends JPanel implements Runnable {
                 }
     }
 
+
+    public boolean containsElement(int[] list, int element) { //idk why i have to make my own method for this i cant believe java just doesn thave some thing that can do it mofr me and acutally worolk this langauage sutcks 
+        for(int i : list) {
+            if(i == element) return true;
+        }
+        return false;
+    }
+
     public void key_handle(int code) {
 
                 boolean added = addUserInput(code);
@@ -757,45 +772,39 @@ public class TetrisFrame extends JPanel implements Runnable {
                     if (start == 0) {
                         start = System.nanoTime();
                     }
-                    switch (code) {
-                        case 74: // left
-                            
-                            move_left();
-                            break;
-                        case 76: // r
-                            move_right();
-                            break;
-                        case 85: // u
-                            move_up();
-                            break;
-                        case 59: // d
-                            soft_drop();
-                            break;
-                        case 65: // ccw
-                            rotate_ccw();
-                            break;
-                        case 83: // cw
-                            rotate_cw();
-                            break;
-                        case 16: // 180
-                            rotate_180();
-                            break;
-                        case 68: // hold
-                            hold();
-                            break;
-                        case 75: // hd
-                            hard_drop();
-                            break;
-                        case 8: // backspace to reset
-                            reset();
-                            break;
-                        case 32: // ghost and is spacebar
-                            ghost();
-                            break;
-                        default:
-                            break;
-
+                    //no if else statements in case user wants one key to be binded to multiple stuff
+                    //^^ WAIT ACTUALLY INSIGHTFUL COMMENT WHAT
+                    if(containsElement(settings.MOVE_LEFT, code)) {
+                        move_left();
                     }
+                    if(containsElement(settings.MOVE_RIGHT, code)) {
+                        move_right();
+                    }
+                    if(containsElement(settings.SOFT_DROP, code)) {
+                        soft_drop();
+                    }
+                    if(containsElement(settings.ROTATE_CCW, code)) {
+                        rotate_ccw();
+                    }
+                    if(containsElement(settings.ROTATE_CW, code)) {
+                        rotate_cw();
+                    }
+                    if(containsElement(settings.ROTATE_180, code)) {
+                        rotate_180();
+                    }
+                    if(containsElement(settings.HOLD, code)) {
+                        hold();
+                    }
+                    if(containsElement(settings.HARD_DROP, code)) {
+                        hard_drop();
+                    }
+                    if(containsElement(settings.RESET, code)) {
+                        reset();
+                    }
+                    if(containsElement(settings.GHOST_ACTION, code)) {
+                        ghost();
+                    }
+
                     
                     
                 }
