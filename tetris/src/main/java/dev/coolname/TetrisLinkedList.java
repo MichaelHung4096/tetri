@@ -21,6 +21,18 @@ class TetrisNode {
     public int[][] getBoard() {
         return board;
     }
+    
+    public TetrisPiece getHold() {
+        return hold;
+    }
+
+    public ArrayList<TetrisPiece> getQueue() {
+        return queue;
+    }
+
+    public TetrisPiece getCurrentPiece() {
+        return currentPiece;
+    }
 
     public void setNext(TetrisNode next) {
         this.next = next;
@@ -101,6 +113,10 @@ public class TetrisLinkedList {
 		else
 			return false;
 	}
+
+    public void resetCursor() {
+        cursor = head;
+    }
 
 
 }

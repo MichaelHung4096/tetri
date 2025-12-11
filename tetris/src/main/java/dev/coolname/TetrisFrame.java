@@ -34,6 +34,8 @@ public class TetrisFrame extends JPanel implements Runnable {
     // public  int DAS_DIRECTION = 0;
     public  int gravity = 1000000;
     public long gravity_timer;
+    public boolean IRS;
+    public boolean IHS;
 
     public  final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
             Color.YELLOW, Color.PINK };
@@ -95,10 +97,12 @@ public class TetrisFrame extends JPanel implements Runnable {
     HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
 
     TetrisSettings settings;
+    TetrisLinkedList history;
 
     public TetrisFrame(TetrisSettings settings) {
         this.settings = settings;
         gravity_timer = System.nanoTime();
+        history = new TetrisLinkedList();
 
         initBoard();
         setFinesseMap();
@@ -124,6 +128,41 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     //SET STUFF
+    //maybe i just replace all instances of these with settings.<variable> instead but like why be efficient 
+    //and smart and you can instead be stupid and bash your head against brick walls
+    public void setSettings() {
+        DAS = settings.DAS;
+        ARR = settings.ARR;
+        SDF = settings.SDF;
+        IRS = settings.IRS;
+        IHS = settings.IHS;
+        gravity = settings.GRAVITY;
+        
+
+         
+        
+    }
+    public void undo() {
+        history.resetCursor();
+    }
+
+    public void redo() {
+        TetrisNode node = history.cursor;
+        board = node.getBoard();
+        hold = node.getHold();
+        queue = node.getQueue();
+        currentPiece = node.getCurrentPiece();
+        history.advanceCursor();
+        repaint();
+
+    }
+
+    public void addToHistory() {
+        
+        TetrisNode node = new TetrisNode(board.clone(), hold,(ArrayList<TetrisPiece>) queue.clone(), currentPiece);
+        history.Insert(node);
+
+    }
 
     //yooooo lets just have an enum for all the data of each piece and then not use it lets gooooo
     public void setFinesseMap() {
@@ -737,6 +776,7 @@ public class TetrisFrame extends JPanel implements Runnable {
                             total_time_on_ground = 0;
                             keys_per_piece = keys_pressed / pieces_placed;
                             insertGhostPiece();
+                            addToHistory();
     }
 
     private void ghost() {
@@ -803,6 +843,12 @@ public class TetrisFrame extends JPanel implements Runnable {
                     }
                     if(containsElement(settings.GHOST_ACTION, code)) {
                         ghost();
+                    }
+                    if(code == 81) {
+                        undo();
+                    }
+                    if(code == 87) {
+                        redo();
                     }
 
                     
