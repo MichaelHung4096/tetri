@@ -21,6 +21,13 @@ class TetrisNode {
     public int[][] getBoard() {
         return board;
     }
+
+    public void skibidi() {
+        for(int i = 0; i < 10; i++) {
+            System.out.print(this.board[39][i]);
+        }
+        System.out.println();
+    }
     
     public TetrisPiece getHold() {
         return hold;
@@ -66,6 +73,10 @@ public class TetrisLinkedList {
         cursor = null;
     }
 
+    public void reset() {
+        head = tail = cursor = null;
+    }
+
 	public void addNewHead(TetrisNode newNode) {
 		newNode.setNext(head);
         head.setPrev(newNode);
@@ -81,6 +92,7 @@ public class TetrisLinkedList {
 		else {
 			newNode.setNext(cursor.getNext());
 			cursor.setNext(newNode); 
+            newNode.setPrev(cursor);
 			cursor = newNode;//if we advance the cursor
 			if (cursor.getNext() == null) tail = cursor;
 		}

@@ -120,6 +120,9 @@ public class TetrisFrame extends JPanel implements Runnable {
         updateCurrentPiece();
         insertGhostPiece();
 
+
+        addToHistory();
+
         
         for(int i =0; i < COLS; i++) {
             kpm_detected[i] = false;
@@ -143,6 +146,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         
     }
     public void undo() {
+        System.out.println("sadfdsd");
         history.resetCursor();
     }
 
@@ -152,14 +156,34 @@ public class TetrisFrame extends JPanel implements Runnable {
         hold = node.getHold();
         queue = node.getQueue();
         currentPiece = node.getCurrentPiece();
+        resetPieceStuff();
         history.advanceCursor();
-        repaint();
+        
 
     }
 
+    public void undodo2() {
+        history.regressCursor();
+        TetrisNode node = history.cursor;
+        board = node.getBoard();
+        hold = node.getHold();
+        queue = node.getQueue();
+        currentPiece = node.getCurrentPiece();
+        resetPieceStuff();
+
+
+    }
+
+    public ArrayList<TetrisPiece> copyQueue() { //theres probably a one line way to do this but oh well
+        ArrayList<TetrisPiece> copy = new ArrayList<>();
+        for(TetrisPiece t : queue) {
+            copy.add(t);
+        }
+        return copy;
+    }
     public void addToHistory() {
-        
-        TetrisNode node = new TetrisNode(board.clone(), hold,(ArrayList<TetrisPiece>) queue.clone(), currentPiece);
+        TetrisNode node = new TetrisNode(Arrays.stream(board).map(int[]::clone).toArray(int[][]::new) //i love copy pasting code from stack overfloe<3
+        , hold, copyQueue(), currentPiece); 
         history.Insert(node);
 
     }
@@ -228,6 +252,9 @@ public class TetrisFrame extends JPanel implements Runnable {
         hold = null;
 
         resetPieceStuff();
+
+        history.reset();
+        addToHistory();
 
         lines = 0;
         pieces_placed = 0;
@@ -849,6 +876,9 @@ public class TetrisFrame extends JPanel implements Runnable {
                     }
                     if(code == 87) {
                         redo();
+                    }
+                    if(code == 69) {
+                        undodo2();
                     }
 
                     
