@@ -3,10 +3,14 @@ package dev.coolname;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.io.File;
+
+import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,8 +56,7 @@ frame.requestFocusInWindow();
 
 
         TetrisSettingsFrame settingsMenu = new TetrisSettingsFrame(settings);
-        // frame.add(settingsMenu);
-
+        frame.add(settingsMenu);
         // TetrisFrame p2 = new TetrisFrame();
         // p2.setPreferredSize(d);
         // p2.setBackground(Color.BLACK);

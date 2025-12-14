@@ -90,7 +90,7 @@ public class TetrisLinkedList {
 	public void Insert(TetrisNode newNode) {
 		if (cursor == null) {head = tail = cursor = newNode;}
 		else {
-			newNode.setNext(cursor.getNext());
+			newNode.setNext(null);
 			cursor.setNext(newNode); 
             newNode.setPrev(cursor);
 			cursor = newNode;//if we advance the cursor
