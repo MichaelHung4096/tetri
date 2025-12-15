@@ -49,7 +49,7 @@ frame.requestFocusInWindow();
 
         TetrisFrame pan = new TetrisFrame(settings);
         //pan.setVisible(true);
-        Dimension d = new Dimension((TetrisFrame.COLS + 10) * TetrisFrame.CELL_SIZE, TetrisFrame.ROWS * TetrisFrame.CELL_SIZE);
+        Dimension d = new Dimension((TetrisFrame.COLS + 10) * TetrisFrame.CELL_SIZE, TetrisFrame.ROWS * TetrisFrame.CELL_SIZE + 100);
         pan.setPreferredSize(d);
         pan.setBackground(Color.BLACK);
         frame.add(pan);
