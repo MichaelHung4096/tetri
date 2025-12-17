@@ -1005,11 +1005,11 @@ public class TetrisFrame extends JPanel implements Runnable {
         int key = 0; // key for left/right direciton will be tm
         // long current_time = System.nanoTime();
         for (int i = 0; i < keysHeld.size(); i++) {
-            if (keysHeld.get(i) == 74) {
+            if (containsElement(settings.MOVE_LEFT, keysHeld.get(i))) {
                 ARR_DIRECTION = -1;
                 key = keysHeld.get(i);
             }
-            if (keysHeld.get(i) == 76) {
+            if (containsElement(settings.MOVE_RIGHT, keysHeld.get(i))) {
                 ARR_DIRECTION = 1;
                 key = keysHeld.get(i);
             }
