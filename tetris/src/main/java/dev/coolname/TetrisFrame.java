@@ -150,28 +150,28 @@ public class TetrisFrame extends JPanel implements Runnable {
         history.resetCursor();
     }
 
-    public void redo() {
-        TetrisNode node = history.cursor;
+    private void setStuff(TetrisNode node) {
+        
         board = node.getBoard();
         hold = node.getHold();
         queue = node.getQueue();
         currentPiece = node.getCurrentPiece();
         resetPieceStuff();
-        history.advanceCursor();
+
+    }
+
+    public void redo() {
+        if(history.advanceCursor()) {
+            setStuff(history.cursor);
+        }
         
 
     }
 
     public void undodo2() {
-        history.regressCursor();
-        TetrisNode node = history.cursor;
-        board = node.getBoard();
-        hold = node.getHold();
-        queue = node.getQueue();
-        currentPiece = node.getCurrentPiece();
-        resetPieceStuff();
-
-
+        if(history.regressCursor()) {
+            setStuff(history.cursor);
+        }
     }
 
     public ArrayList<TetrisPiece> copyQueue() { //theres probably a one line way to do this but oh well
