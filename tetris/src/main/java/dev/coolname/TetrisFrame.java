@@ -148,6 +148,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     public void undo() {
         System.out.println("sadfdsd");
         history.resetCursor();
+        setStuff(history.cursor);
     }
 
     private void setStuff(TetrisNode node) {
@@ -161,8 +162,10 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     public void redo() {
+        
         if(history.advanceCursor()) {
-            setStuff(history.cursor);
+            TetrisNode node = history.cursor;
+            setStuff(node);
         }
         
 
@@ -182,10 +185,12 @@ public class TetrisFrame extends JPanel implements Runnable {
         return copy;
     }
     public void addToHistory() {
+        TetrisNode cursor = history.getCursor();
         TetrisNode node = new TetrisNode(Arrays.stream(board).map(int[]::clone).toArray(int[][]::new) //i love copy pasting code from stack overfloe<3
         , hold, copyQueue(), currentPiece); 
         history.Insert(node);
-
+        TetrisNode newC = history.getCursor();
+        System.out.println("ah");
     }
 
     //yooooo lets just have an enum for all the data of each piece and then not use it lets gooooo

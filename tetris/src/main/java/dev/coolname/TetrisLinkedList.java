@@ -58,6 +58,7 @@ class TetrisNode {
         return prev;
     }
 
+
 }
 
 
@@ -128,6 +129,10 @@ public class TetrisLinkedList {
 
     public void resetCursor() {
         cursor = head;
+    }
+
+    public TetrisNode getCursor() {
+        return cursor;
     }
 
 
