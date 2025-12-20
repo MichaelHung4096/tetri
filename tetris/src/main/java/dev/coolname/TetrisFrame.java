@@ -15,6 +15,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     // just one more variable bro trust me we just need one more variabel and itll
     // fix everything just trust me bro
+    public int temp = 0;
 
     private Thread thread;
     private boolean running = false;
@@ -145,6 +146,8 @@ public class TetrisFrame extends JPanel implements Runnable {
          
         
     }
+
+    
     public void undo() {
         System.out.println("sadfdsd");
         history.resetCursor();
@@ -153,11 +156,12 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     private void setStuff(TetrisNode node) {
         
-        board = node.getBoard();
+        board = copyBoard(node.getBoard());
         hold = node.getHold();
-        queue = node.getQueue();
+        queue = copyQueue(node.getQueue());
         currentPiece = node.getCurrentPiece();
         resetPieceStuff();
+        System.out.println(node.i());
 
     }
 
@@ -177,20 +181,23 @@ public class TetrisFrame extends JPanel implements Runnable {
         }
     }
 
-    public ArrayList<TetrisPiece> copyQueue() { //theres probably a one line way to do this but oh well
-        ArrayList<TetrisPiece> copy = new ArrayList<>();
-        for(TetrisPiece t : queue) {
-            copy.add(t);
+    public ArrayList<TetrisPiece> copyQueue(ArrayList<TetrisPiece> q) {
+        return new ArrayList<>(q);
+    }
+
+    public int[][] copyBoard(int[][] b) {
+        int[][] copy = new int[2*ROWS][COLS];
+        for(int i = 0; i < 2*ROWS; i++) {
+            for(int j = 0; j < COLS; j++) {
+                copy[i][j] = b[i][j];
+            }
         }
         return copy;
     }
     public void addToHistory() {
-        TetrisNode cursor = history.getCursor();
-        TetrisNode node = new TetrisNode(Arrays.stream(board).map(int[]::clone).toArray(int[][]::new) //i love copy pasting code from stack overfloe<3
-        , hold, copyQueue(), currentPiece); 
+        TetrisNode node = new TetrisNode(copyBoard(this.board), hold, copyQueue(this.queue), currentPiece, temp++); 
         history.Insert(node);
-        TetrisNode newC = history.getCursor();
-        System.out.println("ah");
+
     }
 
     //yooooo lets just have an enum for all the data of each piece and then not use it lets gooooo

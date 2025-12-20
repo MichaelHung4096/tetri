@@ -10,12 +10,14 @@ class TetrisNode {
     private TetrisPiece currentPiece;
     private TetrisNode prev;
     private TetrisNode next;
+    private int i;
 
-    public TetrisNode(int[][] board, TetrisPiece hold, ArrayList<TetrisPiece> queue, TetrisPiece currentPiece) {
+    public TetrisNode(int[][] board, TetrisPiece hold, ArrayList<TetrisPiece> queue, TetrisPiece currentPiece, int i) {
         this.board = board;
         this.hold = hold;
         this.queue = queue;
         this.currentPiece = currentPiece;
+        this.i = i;
     }
 
     public int[][] getBoard() {
@@ -58,6 +60,10 @@ class TetrisNode {
         return prev;
     }
 
+    public int i() {
+        return i;
+    }
+
 
 }
 
@@ -91,11 +97,18 @@ public class TetrisLinkedList {
 	public void Insert(TetrisNode newNode) {
 		if (cursor == null) {head = tail = cursor = newNode;}
 		else {
+                if (cursor.getNext() != null) {
+        cursor.getNext().setPrev(null);
+        cursor.setNext(null);
+        tail = cursor;
+    }
+            
 			newNode.setNext(null);
-			cursor.setNext(newNode); 
+             
             newNode.setPrev(cursor);
-			cursor = newNode;//if we advance the cursor
-			if (cursor.getNext() == null) tail = cursor;
+			cursor.setNext(newNode);
+			cursor = newNode;//if we advance the cursor 
+            tail = cursor;
 		}
 	}
 
@@ -109,7 +122,7 @@ public class TetrisLinkedList {
 
 
 	public boolean advanceCursor() {
-		if (cursor != tail) {
+		if (cursor != null && cursor.getNext() != null) {
 			cursor = cursor.getNext();
 			return true;
 		}
@@ -119,7 +132,7 @@ public class TetrisLinkedList {
 
 
 	public boolean regressCursor() {
-		if (cursor != head) {
+		if (cursor != null && cursor != head) {
 			cursor = cursor.getPrev();
 			return true;
 		}
