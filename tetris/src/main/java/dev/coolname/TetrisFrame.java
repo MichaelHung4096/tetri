@@ -1,6 +1,7 @@
 package dev.coolname;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -33,7 +34,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     public  int SDF = 0;
     public int SDF_timer = SDF;
     // public  int DAS_DIRECTION = 0;
-    public  int gravity = 1000000;
+    public  int gravity = 1000;
     public long gravity_timer;
     public boolean IRS;
     public boolean IHS;
@@ -99,6 +100,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     TetrisSettings settings;
     TetrisLinkedList history;
+    Font customFont = new Font("Serif", Font.PLAIN, 18);
 
     public TetrisFrame(TetrisSettings settings) {
         this.settings = settings;
@@ -725,17 +727,18 @@ public class TetrisFrame extends JPanel implements Runnable {
         g.setColor(Color.WHITE);
         //TODO: this could probably just be all one drawString use \n
         //^^oh would also probably be rlly good for truncating doubles
-        g.drawString("Lines cleared: " + lines, CELL_SIZE, 6 * CELL_SIZE);
-        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE, 7 * CELL_SIZE);
-        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE, 8 * CELL_SIZE);
-        g.drawString("KPP: " + keys_per_piece, CELL_SIZE, 9 * CELL_SIZE);
-        g.drawString("Finesse: " + finesse_faults, CELL_SIZE, 10 * CELL_SIZE);
-        g.drawString("TIme : " + time, CELL_SIZE, 11 * CELL_SIZE);
-        g.drawString("total ground : " + average_time_on_ground * pieces_placed, CELL_SIZE, 12 * CELL_SIZE);
-        g.drawString("avg ground : " + average_time_on_ground, CELL_SIZE, 13 * CELL_SIZE);
-        g.drawString("PPS: " + pieces_per_second, CELL_SIZE, 14*CELL_SIZE);
-        g.drawString("KPS: " + keys_per_second, CELL_SIZE, 15*CELL_SIZE);
-        g.drawString("40L times: " + final_time, CELL_SIZE, 16 * CELL_SIZE);
+        g.setFont(customFont);
+        g.drawString("Lines cleared: " + lines, CELL_SIZE - 15, 9 * CELL_SIZE);
+        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE - 15, 10 * CELL_SIZE);
+        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE- 15, 11 * CELL_SIZE);
+        g.drawString("KPP: " + keys_per_piece, CELL_SIZE- 15, 12 * CELL_SIZE);
+        g.drawString("Finesse: " + finesse_faults, CELL_SIZE- 15, 13 * CELL_SIZE);
+        g.drawString("TIme : " + time, CELL_SIZE- 15, 14 * CELL_SIZE);
+        // g.drawString("total ground : " + average_time_on_ground * pieces_placed, CELL_SIZE, 12 * CELL_SIZE);
+        // g.drawString("avg ground : " + average_time_on_ground, CELL_SIZE, 13 * CELL_SIZE);
+        g.drawString("PPS: " + pieces_per_second, CELL_SIZE- 15, 15*CELL_SIZE);
+        g.drawString("KPS: " + keys_per_second, CELL_SIZE- 15, 16*CELL_SIZE);
+        g.drawString("40L times: " + final_time, CELL_SIZE- 15, 17 * CELL_SIZE);
 
     }
 
