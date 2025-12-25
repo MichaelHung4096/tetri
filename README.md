@@ -12,6 +12,7 @@ A tetris game with the focus of clearing 40 lines as fast as possible
 [demo run](https://youtu.be/8cQf9-rwNRQ)
 
 also has:
+* basic stats like keys per second, pieces per second, and [finesse faults](https://four.lol/mid-game/finesse) 
 * undo/redo system, [demo here](https://youtu.be/bYmyOCGBjFA)
 * invisible board: [snippet here](https://youtu.be/qKqirIZs3-s)
 
