@@ -21,6 +21,7 @@ Since i coded the whole thing, it is alot easier for me to mod the game. If i ma
 * [abusing the rotaion system to clear 40 lines without moving left or right](https://youtu.be/lHNsVhHWY1Q)
 
 ## todo:
+* better visuals, add sfx
 * easier way to modify controls/settings
 * log more data (more metrics + make graphs of them)
 * able to directly edit hold/board/queue
