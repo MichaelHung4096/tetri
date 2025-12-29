@@ -28,35 +28,35 @@ public class TetrisFrame extends JPanel implements Runnable {
     public static final int COLS = 10;
     public static final int CELL_SIZE = 30;
 
-    public  int DAS = 80;
-    public  int ARR = 0;
+    public int DAS = 80;
+    public int ARR = 0;
     public int ARR_timer = ARR;
-    public  int SDF = 0;
+    public int SDF = 0;
     public int SDF_timer = SDF;
-    // public  int DAS_DIRECTION = 0;
-    public  int gravity = 1000;
+    // public int DAS_DIRECTION = 0;
+    public int gravity = 1000;
     public long gravity_timer;
     public boolean IRS;
     public boolean IHS;
 
-    public  final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
+    public final Color[] colors = { Color.BLACK, Color.CYAN, Color.BLUE, Color.ORANGE, Color.GREEN, Color.RED,
             Color.YELLOW, Color.PINK };
 
-    public  final int BOARD_XOFFSET = 5 * CELL_SIZE;
-    public  final int BOARD_YOFFSET = 0;
+    public final int BOARD_XOFFSET = 5 * CELL_SIZE;
+    public final int BOARD_YOFFSET = 0;
     private int board[][] = new int[ROWS * 2][COLS];
 
-    public  final int HOLD_XOFFSET = 0;
-    public  final int HOLD_YOFFSET = 0;
+    public final int HOLD_XOFFSET = 0;
+    public final int HOLD_YOFFSET = 0;
     private TetrisPiece hold;
 
-    public  final int QUEUE_DISPLAY_LENGTH = 5;
-    public  final int QUEUE_XOFFSET = 16 * CELL_SIZE;
-    private  final TetrisPiece[] all_pieces = TetrisPiece.values();
-    public  final int[] QUEUE_YOFFSET = { 0, 3 * CELL_SIZE, 6 * CELL_SIZE, 9 * CELL_SIZE, 12 * CELL_SIZE }; // TODO:
-                                                                                                                  // do
-                                                                                                                  // this
-                                                                                                                  // dynamically
+    public final int QUEUE_DISPLAY_LENGTH = 5;
+    public final int QUEUE_XOFFSET = 16 * CELL_SIZE;
+    private final TetrisPiece[] all_pieces = TetrisPiece.values();
+    public final int[] QUEUE_YOFFSET = { 0, 3 * CELL_SIZE, 6 * CELL_SIZE, 9 * CELL_SIZE, 12 * CELL_SIZE }; // TODO:
+                                                                                                           // do
+                                                                                                           // this
+                                                                                                           // dynamically
     public ArrayList<TetrisPiece> queue = new ArrayList<>();
 
     private TetrisPiece currentPiece;
@@ -71,8 +71,8 @@ public class TetrisFrame extends JPanel implements Runnable {
     private ArrayList<Integer> keysHeld = new ArrayList<>();
     private HashMap<Integer, Long> keysHeldDuration = new HashMap<>();
 
-
-    //ohh maybe i use like a hashmap named stats that would make alot more sense huh 
+    // ohh maybe i use like a hashmap named stats that would make alot more sense
+    // huh
     public int lines = 0;
     public double pieces_placed = 0;
     public double keys_pressed = 0;
@@ -102,6 +102,11 @@ public class TetrisFrame extends JPanel implements Runnable {
     TetrisLinkedList history;
     Font customFont = new Font("Serif", Font.PLAIN, 18);
 
+    public double mkpp_window = 1000; // ms
+    public long mkpp_lastactive = 0;
+    public boolean mkpp_active = false;
+    public ArrayList<TetrisGameAction> actions;
+
     public TetrisFrame(TetrisSettings settings) {
         this.settings = settings;
         gravity_timer = System.nanoTime();
@@ -109,10 +114,9 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         initBoard();
         setFinesseMap();
-        //addKeyListener();
-        //setFocusable(true);
-        //requestFocusInWindow();
-
+        // addKeyListener();
+        // setFocusable(true);
+        // requestFocusInWindow();
 
         addToQueue();
         addToQueue();
@@ -123,19 +127,21 @@ public class TetrisFrame extends JPanel implements Runnable {
         updateCurrentPiece();
         insertGhostPiece();
 
-
         addToHistory();
 
-        
-        for(int i =0; i < COLS; i++) {
+        actions = new ArrayList<>();
+
+        for (int i = 0; i < COLS; i++) {
             kpm_detected[i] = false;
         }
 
     }
 
-    //SET STUFF
-    //maybe i just replace all instances of these with settings.<variable> instead but like why be efficient 
-    //and smart and you can instead be stupid and bash your head against brick walls
+    // SET STUFF
+    // maybe i just replace all instances of these with settings.<variable> instead
+    // but like why be efficient
+    // and smart and you can instead be stupid and bash your head against brick
+    // walls
     public void setSettings() {
         DAS = settings.DAS;
         ARR = settings.ARR;
@@ -143,13 +149,9 @@ public class TetrisFrame extends JPanel implements Runnable {
         IRS = settings.IRS;
         IHS = settings.IHS;
         gravity = settings.GRAVITY;
-        
 
-         
-        
     }
 
-    
     public void undo() {
         System.out.println("sadfdsd");
         history.resetCursor();
@@ -157,7 +159,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     private void setStuff(TetrisNode node) {
-        
+
         board = copyBoard(node.getBoard());
         hold = node.getHold();
         queue = copyQueue(node.getQueue());
@@ -168,17 +170,16 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     public void redo() {
-        
-        if(history.advanceCursor()) {
+
+        if (history.advanceCursor()) {
             TetrisNode node = history.cursor;
             setStuff(node);
         }
-        
 
     }
 
     public void undodo2() {
-        if(history.regressCursor()) {
+        if (history.regressCursor()) {
             setStuff(history.cursor);
         }
     }
@@ -188,21 +189,23 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     public int[][] copyBoard(int[][] b) {
-        int[][] copy = new int[2*ROWS][COLS];
-        for(int i = 0; i < 2*ROWS; i++) {
-            for(int j = 0; j < COLS; j++) {
+        int[][] copy = new int[2 * ROWS][COLS];
+        for (int i = 0; i < 2 * ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
                 copy[i][j] = b[i][j];
             }
         }
         return copy;
     }
+
     public void addToHistory() {
-        TetrisNode node = new TetrisNode(copyBoard(this.board), hold, copyQueue(this.queue), currentPiece, temp++); 
+        TetrisNode node = new TetrisNode(copyBoard(this.board), hold, copyQueue(this.queue), currentPiece, temp++);
         history.Insert(node);
 
     }
 
-    //yooooo lets just have an enum for all the data of each piece and then not use it lets gooooo
+    // yooooo lets just have an enum for all the data of each piece and then not use
+    // it lets gooooo
     public void setFinesseMap() {
         finesseMap.put('T', new Integer[][] {
                 { 2, 3, 2, 1, 2, 3, 3, 2 },
@@ -285,8 +288,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         average_time_on_ground = 0;
         final_time = 0;
 
-
-        for(int i = 0; i < COLS; i++) {
+        for (int i = 0; i < COLS; i++) {
             kpm_keys[i] = 0;
             kpm_minos[i] = 0;
             kpm_detected[i] = false;
@@ -540,11 +542,10 @@ public class TetrisFrame extends JPanel implements Runnable {
 
                     board[yCoord + i][xCoord + j] = data[i][j];
 
-
-                    if(kpm_detected[xCoord + j] == false) {
+                    if (kpm_detected[xCoord + j] == false) {
                         kpm_detected[xCoord + j] = true;
-                        
-                    kpm_minos[xCoord + j] += 1;
+
+                        kpm_minos[xCoord + j] += 1;
                         kpm_keys[xCoord + j] += current_keys_pressed;
                     }
                 } catch (Exception e) {
@@ -552,7 +553,7 @@ public class TetrisFrame extends JPanel implements Runnable {
                 }
             }
         }
-        for(int i =0; i < COLS; i++) {
+        for (int i = 0; i < COLS; i++) {
             kpm_detected[i] = false;
         }
 
@@ -725,241 +726,300 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         // draw stats
         g.setColor(Color.WHITE);
-        //TODO: this could probably just be all one drawString use \n
-        //^^oh would also probably be rlly good for truncating doubles
+        // TODO: this could probably just be all one drawString use \n
+        // ^^oh would also probably be rlly good for truncating doubles
         g.setFont(customFont);
         g.drawString("Lines cleared: " + lines, CELL_SIZE - 15, 9 * CELL_SIZE);
         g.drawString("piescs placed: " + pieces_placed, CELL_SIZE - 15, 10 * CELL_SIZE);
-        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE- 15, 11 * CELL_SIZE);
-        g.drawString("KPP: " + keys_per_piece, CELL_SIZE- 15, 12 * CELL_SIZE);
-        g.drawString("Finesse: " + finesse_faults, CELL_SIZE- 15, 13 * CELL_SIZE);
-        g.drawString("TIme : " + time, CELL_SIZE- 15, 14 * CELL_SIZE);
-        // g.drawString("total ground : " + average_time_on_ground * pieces_placed, CELL_SIZE, 12 * CELL_SIZE);
-        // g.drawString("avg ground : " + average_time_on_ground, CELL_SIZE, 13 * CELL_SIZE);
-        g.drawString("PPS: " + pieces_per_second, CELL_SIZE- 15, 15*CELL_SIZE);
-        g.drawString("KPS: " + keys_per_second, CELL_SIZE- 15, 16*CELL_SIZE);
-        g.drawString("40L times: " + final_time, CELL_SIZE- 15, 17 * CELL_SIZE);
+        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE - 15, 11 * CELL_SIZE);
+        g.drawString("KPP: " + keys_per_piece, CELL_SIZE - 15, 12 * CELL_SIZE);
+        g.drawString("Finesse: " + finesse_faults, CELL_SIZE - 15, 13 * CELL_SIZE);
+        g.drawString("TIme : " + time, CELL_SIZE - 15, 14 * CELL_SIZE);
+        // g.drawString("total ground : " + average_time_on_ground * pieces_placed,
+        // CELL_SIZE, 12 * CELL_SIZE);
+        // g.drawString("avg ground : " + average_time_on_ground, CELL_SIZE, 13 *
+        // CELL_SIZE);
+        g.drawString("PPS: " + pieces_per_second, CELL_SIZE - 15, 15 * CELL_SIZE);
+        g.drawString("KPS: " + keys_per_second, CELL_SIZE - 15, 16 * CELL_SIZE);
+        g.drawString("40L times: " + final_time, CELL_SIZE - 15, 17 * CELL_SIZE);
+
+        if (mkpp_active) {
+            g.setColor(Color.WHITE);
+            g.fillRect(CELL_SIZE - 15, 18 * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
 
     }
 
     private void move_left() {
 
-                            keys_pressed++;
-                            current_keys_pressed++;
-                            changeCoord(-1, 0);
-                            insertGhostPiece();
+        if(mkpp_active) {
+            System.out.println("moved left optimally");
+        } else {
+            mkpp_active = true;
+            mkpp_lastactive = System.nanoTime();
+        }
+
+        keys_pressed++;
+        current_keys_pressed++;
+        changeCoord(-1, 0);
+        insertGhostPiece();
     }
 
     private void move_right() {
-        
-                            keys_pressed++;
-                            current_keys_pressed++;
-                            changeCoord(1, 0);
-                            insertGhostPiece();
+
+        if(mkpp_active) {
+            System.out.println("moved right optimally");
+        } else {
+            mkpp_active = true;
+            mkpp_lastactive = System.nanoTime();
+        }
+
+        keys_pressed++;
+        current_keys_pressed++;
+        changeCoord(1, 0);
+        insertGhostPiece();
     }
 
     private void move_up() {
-        
-                            keys_pressed++;
-                            current_keys_pressed++;
-                            changeCoord(0, -1);
-                            insertGhostPiece();
+
+        keys_pressed++;
+        current_keys_pressed++;
+        changeCoord(0, -1);
+        insertGhostPiece();
     }
 
     private void soft_drop() {
-        
-                            keys_pressed++;
-                            current_keys_pressed++;
-                            softDrop(); //yea bro lets just have two mehtods named soft drop im so good at naming stuff
-                            insertGhostPiece();
+
+        keys_pressed++;
+        current_keys_pressed++;
+        softDrop(); // yea bro lets just have two mehtods named soft drop im so good at naming stuff
+        insertGhostPiece();
     }
 
     private void rotate_ccw() {
+
+        keys_pressed++;
+        current_keys_pressed++;
         
-                            keys_pressed++;
-                            current_keys_pressed++;
-                            rotatePiece(1);
-                            insertGhostPiece();
+        if(!mkpp_active) {
+            mkpp_active = true;
+            mkpp_lastactive = System.nanoTime();
+        } else {
+            System.out.println("good ccw");
+        }
+
+        rotatePiece(1);
+        insertGhostPiece();
     }
 
     private void rotate_cw() {
+
+        keys_pressed++;
+        current_keys_pressed++;
         
-                            keys_pressed++;
-                            current_keys_pressed++;
-                            rotatePiece(3);
-                            insertGhostPiece();
+        if(!mkpp_active) {
+            mkpp_active = true;
+            mkpp_lastactive = System.nanoTime();
+        } else {
+            System.out.println("nice cw");
+        }
+
+        rotatePiece(3);
+        insertGhostPiece();
     }
 
     private void rotate_180() {
-        
-                            keys_pressed++;
-                            current_keys_pressed++;
-                            rotatePiece(2);
-                            insertGhostPiece();
+
+        keys_pressed++;
+        current_keys_pressed++;
+        if(!mkpp_active) {
+            mkpp_active = true;
+            mkpp_lastactive = System.nanoTime();
+        } else {
+            System.out.println("banger 180");
+        }
+        rotatePiece(2);
+        insertGhostPiece();
     }
 
     private void hold() {
-        
-                            keys_pressed++;
-                            current_keys_pressed++;
-                            holdPiece();
-                            insertGhostPiece();
+
+        keys_pressed++;
+        current_keys_pressed++;
+        holdPiece();
+        insertGhostPiece();
     }
 
     private void hard_drop() {
-        
-                            keys_pressed++;
-                            current_keys_pressed++;
-                            insertPiece();
-                            addToQueue();
-                            average_time_on_ground = ((average_time_on_ground * pieces_placed) + (total_time_on_ground))
-                                    / (pieces_placed + 1);
-                            pieces_placed++;
-                            total_time_on_ground = 0;
-                            keys_per_piece = keys_pressed / pieces_placed;
-                            insertGhostPiece();
-                            addToHistory();
+
+        keys_pressed++;
+        current_keys_pressed++;
+        insertPiece();
+        addToQueue();
+        average_time_on_ground = ((average_time_on_ground * pieces_placed) + (total_time_on_ground))
+                / (pieces_placed + 1);
+        pieces_placed++;
+        total_time_on_ground = 0;
+        keys_per_piece = keys_pressed / pieces_placed;
+        insertGhostPiece();
+        addToHistory();
     }
 
     private void ghost() {
-        
-                            ghost_timer = System.nanoTime();
-                            peek = true;
+
+        ghost_timer = System.nanoTime();
+        peek = true;
     }
 
     public void key_released(KeyEvent e) {
-                        try {
+        try {
 
-                    int code = e.getKeyCode();
-                    keysHeld.remove(Integer.valueOf(code));
-                    keysHeldDuration.replace(Integer.valueOf(code), Long.MAX_VALUE);
+            int code = e.getKeyCode();
+            keysHeld.remove(Integer.valueOf(code));
+            keysHeldDuration.replace(Integer.valueOf(code), Long.MAX_VALUE);
 
-                } catch (Exception E) {
+        } catch (Exception E) {
 
-                }
+        }
     }
 
-
-    public boolean containsElement(int[] list, int element) { //idk why i have to make my own method for this i cant believe java just doesn thave some thing that can do it mofr me and acutally worolk this langauage sutcks 
-        for(int i : list) {
-            if(i == element) return true;
+    public boolean containsElement(int[] list, int element) { // idk why i have to make my own method for this i cant
+                                                              // believe java just doesn thave some thing that can do it
+                                                              // mofr me and acutally worolk this langauage sutcks
+        for (int i : list) {
+            if (i == element)
+                return true;
         }
         return false;
     }
 
     public void key_handle(int code) {
 
-                boolean added = addUserInput(code);
-                if (added) {
-                    if (start == 0) {
-                        start = System.nanoTime();
-                    }
-                    //no if else statements in case user wants one key to be binded to multiple stuff
-                    //^^ WAIT ACTUALLY INSIGHTFUL COMMENT WHAT
-                    if(containsElement(settings.MOVE_LEFT, code)) {
-                        move_left();
-                    }
-                    if(containsElement(settings.MOVE_RIGHT, code)) {
-                        move_right();
-                    }
-                    if(containsElement(settings.SOFT_DROP, code)) {
-                        soft_drop();
-                    }
-                    if(containsElement(settings.ROTATE_CCW, code)) {
-                        rotate_ccw();
-                    }
-                    if(containsElement(settings.ROTATE_CW, code)) {
-                        rotate_cw();
-                    }
-                    if(containsElement(settings.ROTATE_180, code)) {
-                        rotate_180();
-                    }
-                    if(containsElement(settings.HOLD, code)) {
-                        hold();
-                    }
-                    if(containsElement(settings.HARD_DROP, code)) {
-                        hard_drop();
-                    }
-                    if(containsElement(settings.RESET, code)) {
-                        reset();
-                    }
-                    if(containsElement(settings.GHOST_ACTION, code)) {
-                        ghost();
-                    }
-                    if(code == 81) {
-                        undo();
-                    }
-                    if(code == 87) {
-                        redo();
-                    }
-                    if(code == 69) {
-                        undodo2();
-                    }
+        boolean added = addUserInput(code);
+        if (added) {
+            if (start == 0) {
+                start = System.nanoTime();
+            }
+            // no if else statements in case user wants one key to be binded to multiple
+            // stuff
+            // ^^ WAIT ACTUALLY INSIGHTFUL COMMENT WHAT
+            if (containsElement(settings.MOVE_LEFT, code)) {
+                actions.add(TetrisGameAction.MOVE_LEFT);
+                move_left();
+            }
+            if (containsElement(settings.MOVE_RIGHT, code)) {
+                actions.add(TetrisGameAction.MOVE_RIGHT);
+                move_right();
+            }
+            if (containsElement(settings.SOFT_DROP, code)) {
+                actions.add(TetrisGameAction.SOFT_DROP);
+                soft_drop();
+            }
+            if (containsElement(settings.ROTATE_CCW, code)) {
+                actions.add(TetrisGameAction.ROTATE_CCW);
+                rotate_ccw();
+            }
+            if (containsElement(settings.ROTATE_CW, code)) {
+                actions.add(TetrisGameAction.ROTATE_CW);
+                rotate_cw();
+            }
+            if (containsElement(settings.ROTATE_180, code)) {
+                actions.add(TetrisGameAction.ROTATE_180);
+                rotate_180();
+            }
+            if (containsElement(settings.HOLD, code)) {
+                actions.add(TetrisGameAction.HOLD);
+                hold();
+            }
+            if (containsElement(settings.HARD_DROP, code)) {
+                actions.add(TetrisGameAction.HARD_DROP);
+                hard_drop();
+            }
+            if (containsElement(settings.RESET, code)) {
+                reset();
+            }
+            if (containsElement(settings.GHOST_ACTION, code)) {
+                ghost();
+            }
+            if (code == 81) {
+                undo();
+            }
+            if (code == 87) {
+                redo();
+            }
+            if (code == 69) {
+                undodo2();
+            }
 
-                    
-                    
+            if(code == 54) {
+                System.out.println("Actions taken this game:");
+                for(TetrisGameAction action : actions) {
+                    System.out.println(action);
                 }
+            }
+
+        }
     }
     // // KEY LISTENER
     // private void addKeyListener() {
-    //     this.addKeyListener(new KeyAdapter() {
-    //         @Override
-    //         public void keyPressed(KeyEvent e) {
-    //             int code = e.getKeyCode();
-    //             // System.out.println(code);
-    //             boolean added = addUserInput(code);
-    //             if (added) {
-    //                 if (start == 0) {
-    //                     start = System.nanoTime();
-    //                 }
-    //                 switch (code) {
-    //                     case 74: // left
-    //                         move_left();
-    //                         break;
-    //                     case 76: // r
-    //                         move_right();
-    //                         break;
-    //                     case 85: // u
-    //                         move_up();
-    //                         break;
-    //                     case 59: // d
-    //                         soft_drop();
-    //                         break;
-    //                     case 65: // ccw
-    //                         rotate_ccw();
-    //                         break;
-    //                     case 83: // cw
-    //                         rotate_cw();
-    //                         break;
-    //                     case 16: // 180
-    //                         rotate_180();
-    //                         break;
-    //                     case 68: // hold
-    //                         hold();
-    //                         break;
-    //                     case 75: // hd
-    //                         hard_drop();
-    //                         break;
-    //                     case 8: // backspace to reset
-    //                         reset();
-    //                         break;
-    //                     case 32: // ghost and is spacebar
-    //                         ghost();
-    //                         break;
-    //                     default:
-    //                         break;
+    // this.addKeyListener(new KeyAdapter() {
+    // @Override
+    // public void keyPressed(KeyEvent e) {
+    // int code = e.getKeyCode();
+    // // System.out.println(code);
+    // boolean added = addUserInput(code);
+    // if (added) {
+    // if (start == 0) {
+    // start = System.nanoTime();
+    // }
+    // switch (code) {
+    // case 74: // left
+    // move_left();
+    // break;
+    // case 76: // r
+    // move_right();
+    // break;
+    // case 85: // u
+    // move_up();
+    // break;
+    // case 59: // d
+    // soft_drop();
+    // break;
+    // case 65: // ccw
+    // rotate_ccw();
+    // break;
+    // case 83: // cw
+    // rotate_cw();
+    // break;
+    // case 16: // 180
+    // rotate_180();
+    // break;
+    // case 68: // hold
+    // hold();
+    // break;
+    // case 75: // hd
+    // hard_drop();
+    // break;
+    // case 8: // backspace to reset
+    // reset();
+    // break;
+    // case 32: // ghost and is spacebar
+    // ghost();
+    // break;
+    // default:
+    // break;
 
-    //                 }
-    //             }
+    // }
+    // }
 
-    //         }
+    // }
 
-    //         @Override
-    //         public void keyReleased(KeyEvent e) {
-    //             key_released(e);
+    // @Override
+    // public void keyReleased(KeyEvent e) {
+    // key_released(e);
 
-    //         }
-    //     });
+    // }
+    // });
     // }
 
     public boolean addUserInput(int key) {
@@ -1069,6 +1129,14 @@ public class TetrisFrame extends JPanel implements Runnable {
         if ((current_time - last_drawn) / 1_000_000 >= frame) {
             repaint();
             last_drawn = current_time;
+        }
+
+
+
+        if (mkpp_active) {
+            if ((current_time - mkpp_lastactive) / 1_000_000 >= mkpp_window) {
+                mkpp_active = false;
+            }
         }
     }
 
