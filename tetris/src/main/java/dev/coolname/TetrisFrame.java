@@ -16,7 +16,6 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     // just one more variable bro trust me we just need one more variabel and itll
     // fix everything just trust me bro
-    public int temp = 0;
 
     private Thread thread;
     private boolean running = false;
@@ -124,7 +123,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         addToQueue();
         addToQueue();
 
-        updateCurrentPiece();
+        currentPiece = removeFirstPiece();
         insertGhostPiece();
 
         addToHistory();
@@ -137,23 +136,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     }
 
-    // SET STUFF
-    // maybe i just replace all instances of these with settings.<variable> instead
-    // but like why be efficient
-    // and smart and you can instead be stupid and bash your head against brick
-    // walls
-    public void setSettings() {
-        DAS = settings.DAS;
-        ARR = settings.ARR;
-        SDF = settings.SDF;
-        IRS = settings.IRS;
-        IHS = settings.IHS;
-        gravity = settings.GRAVITY;
-
-    }
-
-    public void undo() {
-        System.out.println("sadfdsd");
+    public void undo2() { //deprecate this soon
         history.resetCursor();
         setStuff(history.cursor);
     }
@@ -165,7 +148,6 @@ public class TetrisFrame extends JPanel implements Runnable {
         queue = copyQueue(node.getQueue());
         currentPiece = node.getCurrentPiece();
         resetPieceStuff();
-        System.out.println(node.i());
 
     }
 
@@ -178,7 +160,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     }
 
-    public void undodo2() {
+    public void undo() {
         if (history.regressCursor()) {
             setStuff(history.cursor);
         }
@@ -199,7 +181,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     public void addToHistory() {
-        TetrisNode node = new TetrisNode(copyBoard(this.board), hold, copyQueue(this.queue), currentPiece, temp++);
+        TetrisNode node = new TetrisNode(copyBoard(this.board), hold, copyQueue(this.queue), currentPiece);
         history.Insert(node);
 
     }
@@ -334,11 +316,6 @@ public class TetrisFrame extends JPanel implements Runnable {
         lines++;
     }
 
-    // HOLD CODE
-    public void setHoldPiece(TetrisPiece piece) {
-        hold = piece;
-    }
-
     // QUEUE CODE
     public void addToQueue() {
         int length = queue.size();
@@ -349,7 +326,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         }
     }
 
-    private ArrayList<TetrisPiece> generateBag() {
+    private ArrayList<TetrisPiece> generateBag() { //todo: use seed to generate bag
 
         ArrayList<TetrisPiece> bag = new ArrayList<>(Arrays.asList(all_pieces));
         Collections.shuffle(bag);
@@ -403,10 +380,6 @@ public class TetrisFrame extends JPanel implements Runnable {
         }
     }
 
-    public void updateCurrentPiece() { // from queeuue right now
-        currentPiece = removeFirstPiece();
-    }
-
     public void rotatePiece(int rotate) {
         int tempPrevRot = prevRotation;
         prevRotation = rotation;
@@ -433,7 +406,6 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     public boolean changeCoord(int xChange, int yChange) {
-        // System.out.println(System.currentTimeMillis());
         xCoord += xChange;
         yCoord += yChange;
         if (isColliding(xCoord, yCoord)) {
@@ -511,7 +483,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         if (hold == null) {
             System.out.println("no piece in hold");
             hold = currentPiece;
-            updateCurrentPiece();
+            currentPiece = removeFirstPiece();
         } else {
             TetrisPiece temp = currentPiece;
             currentPiece = hold;
@@ -549,7 +521,7 @@ public class TetrisFrame extends JPanel implements Runnable {
                         kpm_keys[xCoord + j] += current_keys_pressed;
                     }
                 } catch (Exception e) {
-                    // TODO: handle exception
+                    System.out.println("error in kpm");
                 }
             }
         }
@@ -563,12 +535,10 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         if (lines >= 40 && final_time == 0) {
             final_time = time;
-            System.out.println(pieces_per_second);
-            System.out.println(keys_per_second);
         }
 
         resetPieceStuff();
-        updateCurrentPiece();
+        currentPiece = removeFirstPiece();
 
     }
 
@@ -942,13 +912,13 @@ public class TetrisFrame extends JPanel implements Runnable {
                 ghost();
             }
             if (code == 81) {
-                undo();
+                undo2();
             }
             if (code == 87) {
                 redo();
             }
             if (code == 69) {
-                undodo2();
+                undo();
             }
 
             if(code == 54) {
@@ -1041,8 +1011,8 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     @Override
+    //]fixing race condition means integrating key_handle() code here?
     public void run() {
-        int i = 0;
         while (running) {
             try {
                 Thread.sleep(1);
@@ -1095,8 +1065,8 @@ public class TetrisFrame extends JPanel implements Runnable {
         } catch (Exception e) {
             time = -1;
         }
-        if ((current_time - time) / 1_000_000 >= DAS) {
-            if (ARR == 0) {
+        if ((current_time - time) / 1_000_000 >= settings.DAS) {
+            if (settings.ARR == 0) {
                 while (true && ARR_DIRECTION != 0) {
                     if (!changeCoord(ARR_DIRECTION, 0)) {
                         break;
@@ -1108,13 +1078,13 @@ public class TetrisFrame extends JPanel implements Runnable {
             // pretty sure this is wrong for when arr not 0 but we ball
             if (ARR_timer <= 0) {
                 changeCoord(ARR_DIRECTION, 0);
-                ARR_timer = ARR;
+                ARR_timer = settings.ARR;
             } else {
                 ARR_timer -= sleep;
             }
         }
 
-        if ((current_time - gravity_timer) / 1_000_000 >= gravity) {
+        if ((current_time - gravity_timer) / 1_000_000 >= settings.GRAVITY) {
             if (ghost_yCoord > yCoord) {
                 changeCoord(0, 1);
             }

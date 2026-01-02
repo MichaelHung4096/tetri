@@ -6,7 +6,7 @@ public enum TetrisGameAction {
     SOFT_DROP,
     HARD_DROP,
     ROTATE_CW,
-    ROTATE_CCW,
+    ROTATE_CCW, 
     ROTATE_180,
     HOLD,
 }

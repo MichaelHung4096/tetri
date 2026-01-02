@@ -10,14 +10,12 @@ class TetrisNode {
     private TetrisPiece currentPiece;
     private TetrisNode prev;
     private TetrisNode next;
-    private int i;
 
-    public TetrisNode(int[][] board, TetrisPiece hold, ArrayList<TetrisPiece> queue, TetrisPiece currentPiece, int i) {
+    public TetrisNode(int[][] board, TetrisPiece hold, ArrayList<TetrisPiece> queue, TetrisPiece currentPiece) {
         this.board = board;
         this.hold = hold;
         this.queue = queue;
         this.currentPiece = currentPiece;
-        this.i = i;
     }
 
     public int[][] getBoard() {
@@ -60,9 +58,6 @@ class TetrisNode {
         return prev;
     }
 
-    public int i() {
-        return i;
-    }
 
 
 }
