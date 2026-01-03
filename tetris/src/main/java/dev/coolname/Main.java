@@ -73,7 +73,8 @@ frame.requestFocusInWindow();
             @Override
             public void keyPressed(KeyEvent e) {
                 int code = e.getKeyCode();
-                pan.key_handle(code);
+                pan.keyPressQueueAdd(code);
+                // pan.key_handle(code);
                 // p2.key_handle(code);
                 // p3.key_handle(code);
 
@@ -81,7 +82,9 @@ frame.requestFocusInWindow();
 
             @Override
             public void keyReleased(KeyEvent e) {
-                pan.key_released(e);
+                int code = e.getKeyCode();
+                pan.keyReleaseQueue.add(code);
+                // pan.key_released(code);
                 // p2.key_released(e);
                 // p3.key_released(e);
 

@@ -30,4 +30,30 @@ public class TetrisStats {
             kpm_detected[i] = false;
         }
     }
+
+    public void resetStats() {
+        lines = 0;
+        pieces_placed = 0;
+        keys_pressed = 0;
+        keys_per_piece = 0.0;
+        finesse_faults = 0;
+        ghost_timer = Long.MAX_VALUE;
+        peek = false;
+        current_keys_pressed = 0;
+        start = 0;
+        time = 0;
+        final_time = 0;
+        pieces_per_second = 0;
+        keys_per_second = 0;
+        on_ground = false;
+        time_since_ground = 0;
+        total_time_on_ground = 0;
+        average_time_on_ground = 0;
+        for (int i = 0; i < TetrisFrame.COLS; i++) {
+            kpm_keys[i] = 0;
+            kpm_minos[i] = 0;
+            kpm_detected[i] = false;
+        }
+    }
+    
 }

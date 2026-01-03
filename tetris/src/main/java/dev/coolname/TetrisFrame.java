@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Stack;
 
 import javax.swing.JPanel;
 
@@ -72,28 +75,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     // ohh maybe i use like a hashmap named stats that would make alot more sense
     // huh
-    public int lines = 0;
-    public double pieces_placed = 0;
-    public double keys_pressed = 0;
-    public double keys_per_piece = 0.0;
-    public int finesse_faults = 0;
-    public long ghost_timer = Long.MAX_VALUE;
-    public boolean peek = false;
-    public int current_keys_pressed = 0;
-    public double time = 0;
-    public long start;
-    public double final_time = 0;
-    public double pieces_per_second = 0;
-    public double keys_per_second = 0;
-
-    public boolean on_ground = false;
-    public long time_since_ground = 0;
-    public long total_time_on_ground = 0;
-    public double average_time_on_ground = 0;
-
-    public double[] kpm_keys = new double[COLS];
-    public double[] kpm_minos = new double[COLS];
-    public boolean[] kpm_detected = new boolean[COLS];
+    public TetrisStats stats = new TetrisStats();
 
     HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
 
@@ -106,7 +88,11 @@ public class TetrisFrame extends JPanel implements Runnable {
     public boolean mkpp_active = false;
     public ArrayList<TetrisGameAction> actions;
 
+    public Queue<Integer> keyPressQueue = new LinkedList<>(); //queue instead of int in case user is the flash and presses multiple keys within 1 ms
+    public Queue<Integer> keyReleaseQueue = new LinkedList<>();
+
     public TetrisFrame(TetrisSettings settings) {
+        
         this.settings = settings;
         gravity_timer = System.nanoTime();
         history = new TetrisLinkedList();
@@ -131,7 +117,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         actions = new ArrayList<>();
 
         for (int i = 0; i < COLS; i++) {
-            kpm_detected[i] = false;
+            stats.kpm_detected[i] = false;
         }
 
     }
@@ -255,26 +241,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         history.reset();
         addToHistory();
 
-        lines = 0;
-        pieces_placed = 0;
-        keys_per_piece = 0;
-        keys_pressed = 0;
-        finesse_faults = 0;
-
-        start = 0;
-        time = 0;
-
-        on_ground = false;
-        time_since_ground = 0;
-        total_time_on_ground = 0;
-        average_time_on_ground = 0;
-        final_time = 0;
-
-        for (int i = 0; i < COLS; i++) {
-            kpm_keys[i] = 0;
-            kpm_minos[i] = 0;
-            kpm_detected[i] = false;
-        }
+        stats.resetStats();
     }
 
     // BOARD CODE
@@ -313,7 +280,7 @@ public class TetrisFrame extends JPanel implements Runnable {
             board[0][c] = 0;
         }
 
-        lines++;
+        stats.lines++;
     }
 
     // QUEUE CODE
@@ -326,7 +293,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         }
     }
 
-    private ArrayList<TetrisPiece> generateBag() { //todo: use seed to generate bag
+    private ArrayList<TetrisPiece> generateBag() { //TODO: use seed to generate bag
 
         ArrayList<TetrisPiece> bag = new ArrayList<>(Arrays.asList(all_pieces));
         Collections.shuffle(bag);
@@ -350,7 +317,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         ghost_yCoord = yCoord;
         rotation = 0;
         prevRotation = 0;
-        current_keys_pressed = 0;
+        stats.current_keys_pressed = 0;
         gravity_timer = System.nanoTime();
     }
 
@@ -514,11 +481,11 @@ public class TetrisFrame extends JPanel implements Runnable {
 
                     board[yCoord + i][xCoord + j] = data[i][j];
 
-                    if (kpm_detected[xCoord + j] == false) {
-                        kpm_detected[xCoord + j] = true;
+                    if (stats.kpm_detected[xCoord + j] == false) {
+                        stats.kpm_detected[xCoord + j] = true;
 
-                        kpm_minos[xCoord + j] += 1;
-                        kpm_keys[xCoord + j] += current_keys_pressed;
+                        stats.kpm_minos[xCoord + j] += 1;
+                        stats.kpm_keys[xCoord + j] += stats.current_keys_pressed;
                     }
                 } catch (Exception e) {
                     System.out.println("error in kpm");
@@ -526,15 +493,15 @@ public class TetrisFrame extends JPanel implements Runnable {
             }
         }
         for (int i = 0; i < COLS; i++) {
-            kpm_detected[i] = false;
+            stats.kpm_detected[i] = false;
         }
 
         checkFinesse();
 
         clearLines();
 
-        if (lines >= 40 && final_time == 0) {
-            final_time = time;
+        if (stats.lines >= 40 && stats.final_time == 0) {
+            stats.final_time = stats.time;
         }
 
         resetPieceStuff();
@@ -603,8 +570,8 @@ public class TetrisFrame extends JPanel implements Runnable {
             default:
                 break;
         }
-        if (current_keys_pressed > bestMoves) {
-            finesse_faults += current_keys_pressed - bestMoves;
+        if (stats.current_keys_pressed > bestMoves) {
+            stats.finesse_faults += stats.current_keys_pressed - bestMoves;
 
         }
     }
@@ -631,7 +598,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
 
-                if (ghost_timer == Long.MAX_VALUE) {
+                if (stats.ghost_timer == Long.MAX_VALUE) {
                     g.setColor(colors[board[i + ROWS][j]]);
                     g.fillRect(BOARD_XOFFSET + j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
@@ -688,8 +655,8 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         try {
             g.setColor(Color.LIGHT_GRAY);
-            g.drawLine(BOARD_XOFFSET, (lines - 20) * CELL_SIZE, BOARD_XOFFSET + COLS * CELL_SIZE,
-                    (lines - 20) * CELL_SIZE);
+            g.drawLine(BOARD_XOFFSET, (stats.lines - 20) * CELL_SIZE, BOARD_XOFFSET + COLS * CELL_SIZE,
+                    (stats.lines - 20) * CELL_SIZE);
         } catch (Exception e) {
             // do nothing
         }
@@ -699,19 +666,19 @@ public class TetrisFrame extends JPanel implements Runnable {
         // TODO: this could probably just be all one drawString use \n
         // ^^oh would also probably be rlly good for truncating doubles
         g.setFont(customFont);
-        g.drawString("Lines cleared: " + lines, CELL_SIZE - 15, 9 * CELL_SIZE);
-        g.drawString("piescs placed: " + pieces_placed, CELL_SIZE - 15, 10 * CELL_SIZE);
-        g.drawString("keys pressed: " + keys_pressed, CELL_SIZE - 15, 11 * CELL_SIZE);
-        g.drawString("KPP: " + keys_per_piece, CELL_SIZE - 15, 12 * CELL_SIZE);
-        g.drawString("Finesse: " + finesse_faults, CELL_SIZE - 15, 13 * CELL_SIZE);
-        g.drawString("TIme : " + time, CELL_SIZE - 15, 14 * CELL_SIZE);
+        g.drawString("Lines cleared: " + stats.lines, CELL_SIZE - 15, 9 * CELL_SIZE);
+        g.drawString("piescs placed: " + stats.pieces_placed, CELL_SIZE - 15, 10 * CELL_SIZE);
+        g.drawString("keys pressed: " + stats.keys_pressed, CELL_SIZE - 15, 11 * CELL_SIZE);
+        g.drawString("KPP: " + stats.keys_per_piece, CELL_SIZE - 15, 12 * CELL_SIZE);
+        g.drawString("Finesse: " + stats.finesse_faults, CELL_SIZE - 15, 13 * CELL_SIZE);
+        g.drawString("TIme : " + stats.time, CELL_SIZE - 15, 14 * CELL_SIZE);
         // g.drawString("total ground : " + average_time_on_ground * pieces_placed,
         // CELL_SIZE, 12 * CELL_SIZE);
         // g.drawString("avg ground : " + average_time_on_ground, CELL_SIZE, 13 *
         // CELL_SIZE);
-        g.drawString("PPS: " + pieces_per_second, CELL_SIZE - 15, 15 * CELL_SIZE);
-        g.drawString("KPS: " + keys_per_second, CELL_SIZE - 15, 16 * CELL_SIZE);
-        g.drawString("40L times: " + final_time, CELL_SIZE - 15, 17 * CELL_SIZE);
+        g.drawString("PPS: " + stats.pieces_per_second, CELL_SIZE - 15, 15 * CELL_SIZE);
+        g.drawString("KPS: " + stats.keys_per_second, CELL_SIZE - 15, 16 * CELL_SIZE);
+        g.drawString("40L times: " + stats.final_time, CELL_SIZE - 15, 17 * CELL_SIZE);
 
         if (mkpp_active) {
             g.setColor(Color.WHITE);
@@ -729,8 +696,8 @@ public class TetrisFrame extends JPanel implements Runnable {
             mkpp_lastactive = System.nanoTime();
         }
 
-        keys_pressed++;
-        current_keys_pressed++;
+        stats.keys_pressed++;
+        stats.current_keys_pressed++;
         changeCoord(-1, 0);
         insertGhostPiece();
     }
@@ -744,32 +711,32 @@ public class TetrisFrame extends JPanel implements Runnable {
             mkpp_lastactive = System.nanoTime();
         }
 
-        keys_pressed++;
-        current_keys_pressed++;
+        stats.keys_pressed++;
+        stats.current_keys_pressed++;
         changeCoord(1, 0);
         insertGhostPiece();
     }
 
     private void move_up() {
 
-        keys_pressed++;
-        current_keys_pressed++;
+        stats.keys_pressed++;
+        stats.current_keys_pressed++;
         changeCoord(0, -1);
         insertGhostPiece();
     }
 
     private void soft_drop() {
 
-        keys_pressed++;
-        current_keys_pressed++;
+        stats.keys_pressed++;
+        stats.current_keys_pressed++;
         softDrop(); // yea bro lets just have two mehtods named soft drop im so good at naming stuff
         insertGhostPiece();
     }
 
     private void rotate_ccw() {
 
-        keys_pressed++;
-        current_keys_pressed++;
+        stats.keys_pressed++;
+        stats.current_keys_pressed++;
         
         if(!mkpp_active) {
             mkpp_active = true;
@@ -784,8 +751,8 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     private void rotate_cw() {
 
-        keys_pressed++;
-        current_keys_pressed++;
+        stats.keys_pressed++;
+        stats.current_keys_pressed++;
         
         if(!mkpp_active) {
             mkpp_active = true;
@@ -800,8 +767,8 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     private void rotate_180() {
 
-        keys_pressed++;
-        current_keys_pressed++;
+        stats.keys_pressed++;
+        stats.current_keys_pressed++;
         if(!mkpp_active) {
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
@@ -814,43 +781,37 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     private void hold() {
 
-        keys_pressed++;
-        current_keys_pressed++;
+        stats.keys_pressed++;
+        stats.current_keys_pressed++;
         holdPiece();
         insertGhostPiece();
     }
 
     private void hard_drop() {
 
-        keys_pressed++;
-        current_keys_pressed++;
+        stats.keys_pressed++;
+        stats.current_keys_pressed++;
         insertPiece();
         addToQueue();
-        average_time_on_ground = ((average_time_on_ground * pieces_placed) + (total_time_on_ground))
-                / (pieces_placed + 1);
-        pieces_placed++;
-        total_time_on_ground = 0;
-        keys_per_piece = keys_pressed / pieces_placed;
+        stats.average_time_on_ground = ((stats.average_time_on_ground * stats.pieces_placed) + (stats.total_time_on_ground))
+                / (stats.pieces_placed + 1); //TODO: fix this
+
+        stats.pieces_placed++;
+        stats.total_time_on_ground = 0;
+        stats.keys_per_piece = stats.keys_pressed / stats.pieces_placed;
         insertGhostPiece();
         addToHistory();
     }
 
     private void ghost() {
 
-        ghost_timer = System.nanoTime();
-        peek = true;
+        stats.ghost_timer = System.nanoTime(); //TODO: should not be in stats
+        stats.peek = true;
     }
 
-    public void key_released(KeyEvent e) {
-        try {
-
-            int code = e.getKeyCode();
-            keysHeld.remove(Integer.valueOf(code));
-            keysHeldDuration.replace(Integer.valueOf(code), Long.MAX_VALUE);
-
-        } catch (Exception E) {
-
-        }
+    public void key_released(int code) {
+        keysHeld.remove(Integer.valueOf(code));
+        keysHeldDuration.replace(Integer.valueOf(code), Long.MAX_VALUE);
     }
 
     public boolean containsElement(int[] list, int element) { // idk why i have to make my own method for this i cant
@@ -867,8 +828,8 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         boolean added = addUserInput(code);
         if (added) {
-            if (start == 0) {
-                start = System.nanoTime();
+            if (stats.start == 0) { //TODO: dont think start should be in stats either
+                stats.start = System.nanoTime();
             }
             // no if else statements in case user wants one key to be binded to multiple
             // stuff
@@ -929,6 +890,15 @@ public class TetrisFrame extends JPanel implements Runnable {
             }
 
         }
+    }
+
+
+    public void keyPressQueueAdd(int code) {
+        keyPressQueue.add(Integer.valueOf(code));
+    }
+
+    public void keyReleaseQueueAdd(int code) {
+        keyReleaseQueue.add(Integer.valueOf(code));
     }
     // // KEY LISTENER
     // private void addKeyListener() {
@@ -1024,25 +994,37 @@ public class TetrisFrame extends JPanel implements Runnable {
     }
 
     private void update(long current_time) {
-        keys_per_second = keys_pressed / time;
-        pieces_per_second = pieces_placed / time;
 
-        if (peek) {
-            if ((current_time - ghost_timer) / 1_000_000 >= 5000) {
-                ghost_timer = Long.MAX_VALUE;
-                peek = false;
+        while(!keyPressQueue.isEmpty()) { //TODO: figure out if this causes weird behavior in edge case scenario
+            int code = keyPressQueue.poll().intValue();
+            key_handle(code);
+        }
+
+        while(!keyReleaseQueue.isEmpty()) {
+            int code = keyReleaseQueue.poll().intValue();
+            key_released(code);
+        }
+
+
+        stats.keys_per_second = stats.keys_pressed / stats.time;
+        stats.pieces_per_second = stats.pieces_placed / stats.time;
+
+        if (stats.peek) {
+            if ((current_time - stats.ghost_timer) / 1_000_000 >= 5000) {
+                stats.ghost_timer = Long.MAX_VALUE;
+                stats.peek = false;
             }
         }
 
         if (ghost_yCoord == yCoord) {
-            if (!on_ground) {
-                on_ground = true;
-                time_since_ground = current_time;
+            if (!stats.on_ground) {
+                stats.on_ground = true;
+                stats.time_since_ground = current_time;
             }
         } else {
-            if (on_ground) {
-                on_ground = false;
-                total_time_on_ground += ((current_time - time_since_ground) / 1_000_000);
+            if (stats.on_ground) {
+                stats.on_ground = false;
+                stats.total_time_on_ground += ((current_time - stats.time_since_ground) / 1_000_000);
             }
         }
 
@@ -1094,7 +1076,7 @@ public class TetrisFrame extends JPanel implements Runnable {
             gravity_timer = current_time;
         }
 
-        this.time = ((current_time - start) / 1_000_000) / 1000.0;
+        stats.time = ((current_time - stats.start) / 1_000_000) / 1000.0;
 
         if ((current_time - last_drawn) / 1_000_000 >= frame) {
             repaint();
