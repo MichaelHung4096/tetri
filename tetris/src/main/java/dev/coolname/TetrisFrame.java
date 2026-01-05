@@ -73,8 +73,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     private ArrayList<Integer> keysHeld = new ArrayList<>();
     private HashMap<Integer, Long> keysHeldDuration = new HashMap<>();
 
-    // ohh maybe i use like a hashmap named stats that would make alot more sense
-    // huh
+
     public TetrisStats stats = new TetrisStats();
 
     HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
@@ -679,6 +678,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         g.drawString("PPS: " + stats.pieces_per_second, CELL_SIZE - 15, 15 * CELL_SIZE);
         g.drawString("KPS: " + stats.keys_per_second, CELL_SIZE - 15, 16 * CELL_SIZE);
         g.drawString("40L times: " + stats.final_time, CELL_SIZE - 15, 17 * CELL_SIZE);
+        g.drawString("mk: " + stats.m_keys_pressed, CELL_SIZE - 15, 18 * CELL_SIZE);
 
         if (mkpp_active) {
             g.setColor(Color.WHITE);
@@ -694,6 +694,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         } else {
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
+            stats.m_keys_pressed++;
         }
 
         stats.keys_pressed++;
@@ -709,6 +710,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         } else {
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
+            stats.m_keys_pressed++;
         }
 
         stats.keys_pressed++;
@@ -729,6 +731,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         stats.keys_pressed++;
         stats.current_keys_pressed++;
+        stats.m_keys_pressed++;
         softDrop(); // yea bro lets just have two mehtods named soft drop im so good at naming stuff
         insertGhostPiece();
     }
@@ -741,6 +744,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         if(!mkpp_active) {
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
+            stats.m_keys_pressed++;
         } else {
             System.out.println("good ccw");
         }
@@ -757,6 +761,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         if(!mkpp_active) {
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
+            stats.m_keys_pressed++;
         } else {
             System.out.println("nice cw");
         }
@@ -772,6 +777,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         if(!mkpp_active) {
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
+            stats.m_keys_pressed++;
         } else {
             System.out.println("banger 180");
         }
@@ -783,6 +789,8 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         stats.keys_pressed++;
         stats.current_keys_pressed++;
+        stats.m_keys_pressed++;
+        mkpp_active = false;
         holdPiece();
         insertGhostPiece();
     }
@@ -791,6 +799,8 @@ public class TetrisFrame extends JPanel implements Runnable {
 
         stats.keys_pressed++;
         stats.current_keys_pressed++;
+        stats.m_keys_pressed++;
+        mkpp_active = false;
         insertPiece();
         addToQueue();
         stats.average_time_on_ground = ((stats.average_time_on_ground * stats.pieces_placed) + (stats.total_time_on_ground))

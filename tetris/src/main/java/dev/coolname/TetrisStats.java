@@ -15,6 +15,7 @@ public class TetrisStats {
     public double final_time = 0;
     public double pieces_per_second = 0;
     public double keys_per_second = 0;
+    public double m_keys_pressed = 0;
 
     public boolean on_ground = false;
     public long time_since_ground = 0;
@@ -54,6 +55,7 @@ public class TetrisStats {
             kpm_minos[i] = 0;
             kpm_detected[i] = false;
         }
+        m_keys_pressed = 0;
     }
     
 }
