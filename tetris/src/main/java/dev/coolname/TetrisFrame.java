@@ -85,6 +85,7 @@ public class TetrisFrame extends JPanel implements Runnable {
     public double mkpp_window = 1000; // ms
     public long mkpp_lastactive = 0;
     public boolean mkpp_active = false;
+    public TetrisGameAction last_action = null;
     public ArrayList<TetrisGameAction> actions;
 
     public Queue<Integer> keyPressQueue = new LinkedList<>(); //queue instead of int in case user is the flash and presses multiple keys within 1 ms
@@ -241,6 +242,9 @@ public class TetrisFrame extends JPanel implements Runnable {
         addToHistory();
 
         stats.resetStats();
+        
+        actions.clear();
+        last_action = null;
     }
 
     // BOARD CODE
@@ -679,6 +683,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         g.drawString("KPS: " + stats.keys_per_second, CELL_SIZE - 15, 16 * CELL_SIZE);
         g.drawString("40L times: " + stats.final_time, CELL_SIZE - 15, 17 * CELL_SIZE);
         g.drawString("mk: " + stats.m_keys_pressed, CELL_SIZE - 15, 18 * CELL_SIZE);
+        g.drawString("m_fault: " + stats.mk_fault, CELL_SIZE - 15, 19 * CELL_SIZE);
 
         if (mkpp_active) {
             g.setColor(Color.WHITE);
@@ -692,6 +697,9 @@ public class TetrisFrame extends JPanel implements Runnable {
         if(mkpp_active) {
             System.out.println("moved left optimally");
         } else {
+                                    if(last_action == TetrisGameAction.ROTATE_180 || last_action == TetrisGameAction.ROTATE_CCW || last_action == TetrisGameAction.ROTATE_CW) {
+                stats.mk_fault++;
+            }
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
             stats.m_keys_pressed++;
@@ -708,6 +716,10 @@ public class TetrisFrame extends JPanel implements Runnable {
         if(mkpp_active) {
             System.out.println("moved right optimally");
         } else {
+                                    if(last_action == TetrisGameAction.ROTATE_180 || last_action == TetrisGameAction.ROTATE_CCW || last_action == TetrisGameAction.ROTATE_CW) {
+                stats.mk_fault++;
+            }
+
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
             stats.m_keys_pressed++;
@@ -742,6 +754,9 @@ public class TetrisFrame extends JPanel implements Runnable {
         stats.current_keys_pressed++;
         
         if(!mkpp_active) {
+                        if(last_action == TetrisGameAction.MOVE_LEFT || last_action == TetrisGameAction.MOVE_RIGHT) {
+                stats.mk_fault++;
+            }
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
             stats.m_keys_pressed++;
@@ -759,6 +774,9 @@ public class TetrisFrame extends JPanel implements Runnable {
         stats.current_keys_pressed++;
         
         if(!mkpp_active) {
+                                    if(last_action == TetrisGameAction.MOVE_LEFT || last_action == TetrisGameAction.MOVE_RIGHT) {
+                stats.mk_fault++;
+            }
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
             stats.m_keys_pressed++;
@@ -775,6 +793,10 @@ public class TetrisFrame extends JPanel implements Runnable {
         stats.keys_pressed++;
         stats.current_keys_pressed++;
         if(!mkpp_active) {
+            System.out.println(last_action);
+                                    if(last_action == TetrisGameAction.MOVE_LEFT || last_action == TetrisGameAction.MOVE_RIGHT) {
+                stats.mk_fault++;
+            }
             mkpp_active = true;
             mkpp_lastactive = System.nanoTime();
             stats.m_keys_pressed++;
@@ -845,36 +867,52 @@ public class TetrisFrame extends JPanel implements Runnable {
             // stuff
             // ^^ WAIT ACTUALLY INSIGHTFUL COMMENT WHAT
             if (containsElement(settings.MOVE_LEFT, code)) {
-                actions.add(TetrisGameAction.MOVE_LEFT);
                 move_left();
+                last_action = TetrisGameAction.MOVE_LEFT;
+                actions.add(TetrisGameAction.MOVE_LEFT);
+                
             }
             if (containsElement(settings.MOVE_RIGHT, code)) {
-                actions.add(TetrisGameAction.MOVE_RIGHT);
                 move_right();
+                last_action = TetrisGameAction.MOVE_RIGHT;
+                actions.add(TetrisGameAction.MOVE_RIGHT);
+                
             }
             if (containsElement(settings.SOFT_DROP, code)) {
-                actions.add(TetrisGameAction.SOFT_DROP);
                 soft_drop();
+                last_action = TetrisGameAction.SOFT_DROP;
+                actions.add(TetrisGameAction.SOFT_DROP);
+                
             }
             if (containsElement(settings.ROTATE_CCW, code)) {
-                actions.add(TetrisGameAction.ROTATE_CCW);
                 rotate_ccw();
+                last_action = TetrisGameAction.ROTATE_CCW;
+                actions.add(TetrisGameAction.ROTATE_CCW);
+                
             }
             if (containsElement(settings.ROTATE_CW, code)) {
-                actions.add(TetrisGameAction.ROTATE_CW);
                 rotate_cw();
+                last_action = TetrisGameAction.ROTATE_CW;
+                actions.add(TetrisGameAction.ROTATE_CW);
+                
             }
             if (containsElement(settings.ROTATE_180, code)) {
-                actions.add(TetrisGameAction.ROTATE_180);
                 rotate_180();
+                last_action = TetrisGameAction.ROTATE_180;
+                actions.add(TetrisGameAction.ROTATE_180);
+                
             }
             if (containsElement(settings.HOLD, code)) {
-                actions.add(TetrisGameAction.HOLD);
                 hold();
+                last_action = TetrisGameAction.HOLD;
+                actions.add(TetrisGameAction.HOLD);
+                
             }
             if (containsElement(settings.HARD_DROP, code)) {
-                actions.add(TetrisGameAction.HARD_DROP);
                 hard_drop();
+                last_action = TetrisGameAction.HARD_DROP;
+                actions.add(TetrisGameAction.HARD_DROP);
+                
             }
             if (containsElement(settings.RESET, code)) {
                 reset();
