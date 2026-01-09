@@ -101,6 +101,8 @@ frame.requestFocusInWindow();
         // // frame.add(peter);
         // // peter.start();
 
+        pan.generateQueueSeeded(1691885913, 150);
+
 
 
 

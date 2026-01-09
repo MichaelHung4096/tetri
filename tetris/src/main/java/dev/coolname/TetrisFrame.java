@@ -304,6 +304,44 @@ public class TetrisFrame extends JPanel implements Runnable {
         return bag;
     }
 
+public void generateQueueSeeded(long seed, int piece_count) {
+
+    ArrayList<TetrisPiece> q2 = new ArrayList<>();
+
+    seed = seed % 2147483647L;
+    if (seed <= 0) seed += 2147483646L;
+    int bags = (int) Math.ceil(piece_count / 7.0);
+
+    for (int i = 0; i < bags; i++) {
+        ArrayList<TetrisPiece> bag = new ArrayList<>(Arrays.asList(all_pieces));
+
+        int s = bag.size();
+        int j;
+        if (s == 0) return;
+
+        while (--s > 0) {
+            seed = (seed * 16807L) % 2147483647L;
+            double nextFloat = (seed - 1) / 2147483646.0;
+            j = (int) Math.floor(nextFloat * (s + 1));
+            Collections.swap(bag, s, j);
+        }
+        q2.addAll(bag);
+    }
+    System.out.println(q2.toString());
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
     public TetrisPiece removeFirstPiece() {
         // System.out.println(queue.get(0));
         TetrisPiece newCurrentPiece = queue.remove(0);
