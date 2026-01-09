@@ -326,8 +326,23 @@ public void generateQueueSeeded(long seed, int piece_count) {
             Collections.swap(bag, s, j);
         }
         q2.addAll(bag);
+
+        //if stride mode
+        if(i == 0) {//turn bool to ifStride
+            TetrisPiece first = q2.get(0);
+            while(first == TetrisPiece.S_PIECE || first == TetrisPiece.Z_PIECE || first == TetrisPiece.O_PIECE) {
+                // System.out.println(first);
+                q2.remove(0);
+                q2.add(first);
+                
+                first = q2.get(0);
+            }
+        }
+
     }
-    System.out.println(q2.toString());
+    String a = q2.toString();
+    a = a.replaceAll("(?i)_PIECE", "");
+    System.out.println(a);
 }
 
 
