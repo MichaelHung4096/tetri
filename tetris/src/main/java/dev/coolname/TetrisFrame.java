@@ -5,6 +5,9 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,7 +76,6 @@ public class TetrisFrame extends JPanel implements Runnable {
     private ArrayList<Integer> keysHeld = new ArrayList<>();
     private HashMap<Integer, Long> keysHeldDuration = new HashMap<>();
 
-
     public TetrisStats stats = new TetrisStats();
 
     HashMap<Character, Integer[][]> finesseMap = new HashMap<>();
@@ -88,11 +90,12 @@ public class TetrisFrame extends JPanel implements Runnable {
     public TetrisGameAction last_action = null;
     public ArrayList<TetrisGameAction> actions;
 
-    public Queue<Integer> keyPressQueue = new LinkedList<>(); //queue instead of int in case user is the flash and presses multiple keys within 1 ms
+    public Queue<Integer> keyPressQueue = new LinkedList<>(); // queue instead of int in case user is the flash and
+                                                              // presses multiple keys within 1 ms
     public Queue<Integer> keyReleaseQueue = new LinkedList<>();
 
     public TetrisFrame(TetrisSettings settings) {
-        
+
         this.settings = settings;
         gravity_timer = System.nanoTime();
         history = new TetrisLinkedList();
@@ -115,6 +118,8 @@ public class TetrisFrame extends JPanel implements Runnable {
         addToHistory();
 
         actions = new ArrayList<>();
+        last_action = new TetrisGameAction(System.nanoTime(), "GAME_START", "keyup");
+        actions.add(last_action);
 
         for (int i = 0; i < COLS; i++) {
             stats.kpm_detected[i] = false;
@@ -122,7 +127,7 @@ public class TetrisFrame extends JPanel implements Runnable {
 
     }
 
-    public void undo2() { //deprecate this soon
+    public void undo2() { // deprecate this soon
         history.resetCursor();
         setStuff(history.cursor);
     }
@@ -242,9 +247,12 @@ public class TetrisFrame extends JPanel implements Runnable {
         addToHistory();
 
         stats.resetStats();
-        
+
         actions.clear();
-        last_action = null;
+        
+        actions = new ArrayList<>();
+        last_action = new TetrisGameAction(System.nanoTime(), "GAME_START", "keyup");
+        actions.add(last_action);
     }
 
     // BOARD CODE
@@ -296,7 +304,7 @@ public class TetrisFrame extends JPanel implements Runnable {
         }
     }
 
-    private ArrayList<TetrisPiece> generateBag() { //TODO: use seed to generate bag
+    private ArrayList<TetrisPiece> generateBag() { // TODO: use seed to generate bag
 
         ArrayList<TetrisPiece> bag = new ArrayList<>(Arrays.asList(all_pieces));
         Collections.shuffle(bag);
@@ -304,58 +312,48 @@ public class TetrisFrame extends JPanel implements Runnable {
         return bag;
     }
 
-public void generateQueueSeeded(long seed, int piece_count) {
+    public void generateQueueSeeded(long seed, int piece_count) {
 
-    ArrayList<TetrisPiece> q2 = new ArrayList<>();
+        ArrayList<TetrisPiece> q2 = new ArrayList<>();
 
-    seed = seed % 2147483647L;
-    if (seed <= 0) seed += 2147483646L;
-    int bags = (int) Math.ceil(piece_count / 7.0);
+        seed = seed % 2147483647L;
+        if (seed <= 0)
+            seed += 2147483646L;
+        int bags = (int) Math.ceil(piece_count / 7.0);
 
-    for (int i = 0; i < bags; i++) {
-        ArrayList<TetrisPiece> bag = new ArrayList<>(Arrays.asList(all_pieces));
+        for (int i = 0; i < bags; i++) {
+            ArrayList<TetrisPiece> bag = new ArrayList<>(Arrays.asList(all_pieces));
 
-        int s = bag.size();
-        int j;
-        if (s == 0) return;
+            int s = bag.size();
+            int j;
+            if (s == 0)
+                return;
 
-        while (--s > 0) {
-            seed = (seed * 16807L) % 2147483647L;
-            double nextFloat = (seed - 1) / 2147483646.0;
-            j = (int) Math.floor(nextFloat * (s + 1));
-            Collections.swap(bag, s, j);
-        }
-        q2.addAll(bag);
-
-        //if stride mode
-        if(i == 0) {//turn bool to ifStride
-            TetrisPiece first = q2.get(0);
-            while(first == TetrisPiece.S_PIECE || first == TetrisPiece.Z_PIECE || first == TetrisPiece.O_PIECE) {
-                // System.out.println(first);
-                q2.remove(0);
-                q2.add(first);
-                
-                first = q2.get(0);
+            while (--s > 0) {
+                seed = (seed * 16807L) % 2147483647L;
+                double nextFloat = (seed - 1) / 2147483646.0;
+                j = (int) Math.floor(nextFloat * (s + 1));
+                Collections.swap(bag, s, j);
             }
+            q2.addAll(bag);
+
+            // if stride mode
+            if (i == 0) {// turn bool to ifStride
+                TetrisPiece first = q2.get(0);
+                while (first == TetrisPiece.S_PIECE || first == TetrisPiece.Z_PIECE || first == TetrisPiece.O_PIECE) {
+                    // System.out.println(first);
+                    q2.remove(0);
+                    q2.add(first);
+
+                    first = q2.get(0);
+                }
+            }
+
         }
-
+        String a = q2.toString();
+        a = a.replaceAll("(?i)_PIECE", "");
+        System.out.println(a);
     }
-    String a = q2.toString();
-    a = a.replaceAll("(?i)_PIECE", "");
-    System.out.println(a);
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
     public TetrisPiece removeFirstPiece() {
         // System.out.println(queue.get(0));
@@ -747,10 +745,13 @@ public void generateQueueSeeded(long seed, int piece_count) {
 
     private void move_left() {
 
-        if(mkpp_active) {
+        if (mkpp_active) {
             System.out.println("moved left optimally");
         } else {
-                                    if(last_action == TetrisGameAction.ROTATE_180 || last_action == TetrisGameAction.ROTATE_CCW || last_action == TetrisGameAction.ROTATE_CW) {
+            String action = last_action.getAction();
+
+            if (action == "ROTATE_180" || action == "ROTATE_CCW"
+                    || action == "ROTATE_CW") {
                 stats.mk_fault++;
             }
             mkpp_active = true;
@@ -766,10 +767,12 @@ public void generateQueueSeeded(long seed, int piece_count) {
 
     private void move_right() {
 
-        if(mkpp_active) {
+        if (mkpp_active) {
             System.out.println("moved right optimally");
         } else {
-                                    if(last_action == TetrisGameAction.ROTATE_180 || last_action == TetrisGameAction.ROTATE_CCW || last_action == TetrisGameAction.ROTATE_CW) {
+             String action = last_action.getAction();
+            if (action == "ROTATE_180" || action == "ROTATE_CCW"
+                    || action == "ROTATE_CW") {
                 stats.mk_fault++;
             }
 
@@ -805,9 +808,10 @@ public void generateQueueSeeded(long seed, int piece_count) {
 
         stats.keys_pressed++;
         stats.current_keys_pressed++;
-        
-        if(!mkpp_active) {
-                        if(last_action == TetrisGameAction.MOVE_LEFT || last_action == TetrisGameAction.MOVE_RIGHT) {
+
+        if (!mkpp_active) {
+             String action = last_action.getAction();
+            if (action == "MOVE_LEFT" || action == "MOVE_RIGHT") {
                 stats.mk_fault++;
             }
             mkpp_active = true;
@@ -825,9 +829,10 @@ public void generateQueueSeeded(long seed, int piece_count) {
 
         stats.keys_pressed++;
         stats.current_keys_pressed++;
-        
-        if(!mkpp_active) {
-                                    if(last_action == TetrisGameAction.MOVE_LEFT || last_action == TetrisGameAction.MOVE_RIGHT) {
+
+        if (!mkpp_active) {
+             String action = last_action.getAction();
+            if (action == "MOVE_LEFT" || action == "MOVE_RIGHT") {
                 stats.mk_fault++;
             }
             mkpp_active = true;
@@ -845,9 +850,10 @@ public void generateQueueSeeded(long seed, int piece_count) {
 
         stats.keys_pressed++;
         stats.current_keys_pressed++;
-        if(!mkpp_active) {
+        if (!mkpp_active) {
+             String action = last_action.getAction();
             System.out.println(last_action);
-                                    if(last_action == TetrisGameAction.MOVE_LEFT || last_action == TetrisGameAction.MOVE_RIGHT) {
+            if (action == "MOVE_LEFT" || action == "MOVE_RIGHT") {
                 stats.mk_fault++;
             }
             mkpp_active = true;
@@ -878,8 +884,9 @@ public void generateQueueSeeded(long seed, int piece_count) {
         mkpp_active = false;
         insertPiece();
         addToQueue();
-        stats.average_time_on_ground = ((stats.average_time_on_ground * stats.pieces_placed) + (stats.total_time_on_ground))
-                / (stats.pieces_placed + 1); //TODO: fix this
+        stats.average_time_on_ground = ((stats.average_time_on_ground * stats.pieces_placed)
+                + (stats.total_time_on_ground))
+                / (stats.pieces_placed + 1); // TODO: fix this
 
         stats.pieces_placed++;
         stats.total_time_on_ground = 0;
@@ -890,7 +897,7 @@ public void generateQueueSeeded(long seed, int piece_count) {
 
     private void ghost() {
 
-        stats.ghost_timer = System.nanoTime(); //TODO: should not be in stats
+        stats.ghost_timer = System.nanoTime(); // TODO: should not be in stats
         stats.peek = true;
     }
 
@@ -913,7 +920,7 @@ public void generateQueueSeeded(long seed, int piece_count) {
 
         boolean added = addUserInput(code);
         if (added) {
-            if (stats.start == 0) { //TODO: dont think start should be in stats either
+            if (stats.start == 0) { // TODO: dont think start should be in stats either
                 stats.start = System.nanoTime();
             }
             // no if else statements in case user wants one key to be binded to multiple
@@ -921,51 +928,51 @@ public void generateQueueSeeded(long seed, int piece_count) {
             // ^^ WAIT ACTUALLY INSIGHTFUL COMMENT WHAT
             if (containsElement(settings.MOVE_LEFT, code)) {
                 move_left();
-                last_action = TetrisGameAction.MOVE_LEFT;
-                actions.add(TetrisGameAction.MOVE_LEFT);
-                
+                last_action = new TetrisGameAction(System.nanoTime(), "MOVE_LEFT", "keyup");
+                actions.add(last_action);
+
             }
             if (containsElement(settings.MOVE_RIGHT, code)) {
                 move_right();
-                last_action = TetrisGameAction.MOVE_RIGHT;
-                actions.add(TetrisGameAction.MOVE_RIGHT);
-                
+                last_action = new TetrisGameAction(System.nanoTime(), "MOVE_RIGHT", "keyup");
+                actions.add(last_action);
+
             }
             if (containsElement(settings.SOFT_DROP, code)) {
                 soft_drop();
-                last_action = TetrisGameAction.SOFT_DROP;
-                actions.add(TetrisGameAction.SOFT_DROP);
-                
+                last_action = new TetrisGameAction(System.nanoTime(), "SOFT_DROP", "keyup");
+                actions.add(last_action);
+
             }
             if (containsElement(settings.ROTATE_CCW, code)) {
                 rotate_ccw();
-                last_action = TetrisGameAction.ROTATE_CCW;
-                actions.add(TetrisGameAction.ROTATE_CCW);
-                
+                last_action = new TetrisGameAction(System.nanoTime(), "ROTATE_CCW", "keyup");
+                actions.add(last_action);
+
             }
             if (containsElement(settings.ROTATE_CW, code)) {
                 rotate_cw();
-                last_action = TetrisGameAction.ROTATE_CW;
-                actions.add(TetrisGameAction.ROTATE_CW);
-                
+                last_action = new TetrisGameAction(System.nanoTime(), "ROTATE_CW", "keyup");
+                actions.add(last_action);
+
             }
             if (containsElement(settings.ROTATE_180, code)) {
                 rotate_180();
-                last_action = TetrisGameAction.ROTATE_180;
-                actions.add(TetrisGameAction.ROTATE_180);
-                
+                last_action = new TetrisGameAction(System.nanoTime(), "ROTATE_180", "keyup");
+                actions.add(last_action);
+
             }
             if (containsElement(settings.HOLD, code)) {
                 hold();
-                last_action = TetrisGameAction.HOLD;
-                actions.add(TetrisGameAction.HOLD);
-                
+                last_action = new TetrisGameAction(System.nanoTime(), "HOLD", "keyup");
+                actions.add(last_action);
+
             }
             if (containsElement(settings.HARD_DROP, code)) {
                 hard_drop();
-                last_action = TetrisGameAction.HARD_DROP;
-                actions.add(TetrisGameAction.HARD_DROP);
-                
+                last_action = new TetrisGameAction(System.nanoTime(), "HARD_DROP", "keyup");
+                actions.add(last_action);
+
             }
             if (containsElement(settings.RESET, code)) {
                 reset();
@@ -983,16 +990,37 @@ public void generateQueueSeeded(long seed, int piece_count) {
                 undo();
             }
 
-            if(code == 54) {
-                System.out.println("Actions taken this game:");
-                for(TetrisGameAction action : actions) {
-                    System.out.println(action);
-                }
+            if (code == 54) {
+                // System.out.println("Actions taken this game:");
+                // for (TetrisGameAction action : actions) {
+                //     System.out.println(action);
+                // }
+                                Path filePath = Path.of("hist.json");
+
+        try {
+            String aaa = actionsToString();
+            Files.writeString(filePath, aaa);
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
             }
 
         }
     }
 
+    //TODO: temp, edit later
+    public String actionsToString() {
+        StringBuilder s = new StringBuilder();
+        s.append("[");
+        for(TetrisGameAction gameAction : actions) {
+            s.append(gameAction.toString());
+            s.append(',');
+        }
+        s.deleteCharAt(s.length() - 1);
+        s.append(']');
+        return s.toString();
+    }
 
     public void keyPressQueueAdd(int code) {
         keyPressQueue.add(Integer.valueOf(code));
@@ -1082,7 +1110,7 @@ public void generateQueueSeeded(long seed, int piece_count) {
     }
 
     @Override
-    //]fixing race condition means integrating key_handle() code here?
+    // ]fixing race condition means integrating key_handle() code here?
     public void run() {
         while (running) {
             try {
@@ -1096,16 +1124,15 @@ public void generateQueueSeeded(long seed, int piece_count) {
 
     private void update(long current_time) {
 
-        while(!keyPressQueue.isEmpty()) { //TODO: figure out if this causes weird behavior in edge case scenario
+        while (!keyPressQueue.isEmpty()) { // TODO: figure out if this causes weird behavior in edge case scenario
             int code = keyPressQueue.poll().intValue();
             key_handle(code);
         }
 
-        while(!keyReleaseQueue.isEmpty()) {
+        while (!keyReleaseQueue.isEmpty()) {
             int code = keyReleaseQueue.poll().intValue();
             key_released(code);
         }
-
 
         stats.keys_per_second = stats.keys_pressed / stats.time;
         stats.pieces_per_second = stats.pieces_placed / stats.time;
@@ -1183,8 +1210,6 @@ public void generateQueueSeeded(long seed, int piece_count) {
             repaint();
             last_drawn = current_time;
         }
-
-
 
         if (mkpp_active) {
             if ((current_time - mkpp_lastactive) / 1_000_000 >= mkpp_window) {

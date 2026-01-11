@@ -1,14 +1,33 @@
 package dev.coolname;
 
-public enum TetrisGameAction {
-    MOVE_LEFT,
-    MOVE_RIGHT,
-    SOFT_DROP,
-    HARD_DROP,
-    ROTATE_CW,
-    ROTATE_CCW, 
-    ROTATE_180,
-    HOLD,
+public class TetrisGameAction {
+    long time;
+    String action;
+    String type;
+    public TetrisGameAction(long time, String action, String type) {
+        this.time = time;
+        this.action = action;
+        this.type = type;
+
+    }
+
+    public String toString() {
+        return "{\"time\": " + time + ", \"action\": \"" + action + "\", \"type\": \"" + type + "\"}";
+    }
+
+    public String getAction() { //idk how do that bro :(
+        return action;
+    }
+
+
+    // MOVE_LEFT,
+    // MOVE_RIGHT,
+    // SOFT_DROP,
+    // HARD_DROP,
+    // ROTATE_CW,
+    // ROTATE_CCW, 
+    // ROTATE_180,
+    // HOLD,
 
 
     /*
